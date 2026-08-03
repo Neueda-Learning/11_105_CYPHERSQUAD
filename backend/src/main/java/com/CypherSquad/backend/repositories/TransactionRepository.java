@@ -1,20 +1,22 @@
 package com.CypherSquad.backend.repositories;
 
 import com.CypherSquad.backend.models.Transaction;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 
-public interface TransactionRepository extends JpaRepository<Transaction, Long> {
+public interface TransactionRepository {
+	Transaction save(Transaction transaction);
+
+	List<Transaction> findAll();
+
+	Optional<Transaction> findById(Long transactionId);
+
 	long countByAccountIdAndTimestampBetween(Long accountId, LocalDateTime start, LocalDateTime end);
 
 	boolean existsByAccountIdAndPayeeIdAndTimestampBefore(Long accountId, Long payeeId, LocalDateTime timestamp);
 
-	@Query("SELECT COALESCE(SUM(t.amountUsd), 0) FROM Transaction t WHERE t.accountId = :accountId AND t.timestamp BETWEEN :start AND :end")
-	BigDecimal sumAmountUsdByAccountIdAndTimestampBetween(@Param("accountId") Long accountId,
-		@Param("start") LocalDateTime start,
-		@Param("end") LocalDateTime end);
+	BigDecimal sumAmountUsdByAccountIdAndTimestampBetween(Long accountId, LocalDateTime start, LocalDateTime end);
 }
