@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/alerts")
@@ -36,6 +37,12 @@ public class AlertController {
 	@PutMapping("/{id}")
 	public ResponseEntity<Alert> updateAlert(@PathVariable("id") Long alertId, @RequestBody Alert alert) {
 		return ResponseEntity.ok(alertService.updateAlert(alertId, alert));
+	}
+
+	@PutMapping("/{id}/status")
+	public ResponseEntity<Alert> updateAlertStatus(@PathVariable("id") Long alertId,
+		@RequestBody Map<String, String> payload) {
+		return ResponseEntity.ok(alertService.updateAlertStatus(alertId, payload.get("status")));
 	}
 
 	@GetMapping("/{status:[A-Za-z][A-Za-z0-9_-]*}")

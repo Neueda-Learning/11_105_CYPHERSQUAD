@@ -61,6 +61,9 @@ public class Rule {
 	@Column(name = "active", nullable = false)
 	private boolean active;
 
+	@Lob
+	@Column(name = "parameters_json")
+	@Convert(converter = RuleParametersConverter.class)
 	private Map<String, Object> parameters = new LinkedHashMap<>();
 
 	public Rule() {

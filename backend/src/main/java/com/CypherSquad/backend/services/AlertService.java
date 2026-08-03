@@ -15,6 +15,8 @@ public interface AlertService {
 
 	Alert updateAlert(Long alertId, Alert alert);
 
+	Alert updateAlertStatus(Long alertId, String status);
+
 	void deleteAlert(Long alertId);
 
 	Alert getAlertByAlertId(Long alertId);
