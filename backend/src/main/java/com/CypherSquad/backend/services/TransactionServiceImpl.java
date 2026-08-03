@@ -5,14 +5,21 @@ import com.CypherSquad.backend.repositories.TransactionRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Locale;
 import java.util.List;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {
 	private final TransactionRepository transactionRepository;
+	private final CurrencyRateService currencyRateService;
+	private final RuleService ruleService;
 
-	public TransactionServiceImpl(TransactionRepository transactionRepository) {
+	public TransactionServiceImpl(TransactionRepository transactionRepository,
+		CurrencyRateService currencyRateService,
+		RuleService ruleService) {
 		this.transactionRepository = transactionRepository;
+		this.currencyRateService = currencyRateService;
+		this.ruleService = ruleService;
 	}
 
 	@Override
@@ -20,7 +27,15 @@ public class TransactionServiceImpl implements TransactionService {
 		if (transaction.getTimestamp() == null) {
 			transaction.setTimestamp(LocalDateTime.now());
 		}
-		return transactionRepository.save(transaction);
+
+		String normalizedCurrency = transaction.getCurrency() == null || transaction.getCurrency().isBlank()
+			? "USD"
+			: transaction.getCurrency().trim().toUpperCase(Locale.ROOT);
+		transaction.setCurrency(normalizedCurrency);
+		transaction.setAmountUsd(currencyRateService.convertToUsd(transaction.getAmount(), normalizedCurrency));
+		Transaction createdTransaction = transactionRepository.save(transaction);
+		ruleService.evaluateActiveRulesForTransaction(createdTransaction.getTransactionId());
+		return createdTransaction;
 	}
 
 	@Override

@@ -1,6 +1,7 @@
 package com.CypherSquad.backend.controllers;
 
 import com.CypherSquad.backend.models.Rule;
+import com.CypherSquad.backend.models.RuleEvaluationResult;
 import com.CypherSquad.backend.services.RuleService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -48,5 +49,16 @@ public class RuleController {
 	public ResponseEntity<Void> deleteRule(@PathVariable("id") Long ruleId) {
 		ruleService.deleteRule(ruleId);
 		return ResponseEntity.noContent().build();
+	}
+
+	@PostMapping("/{id}/evaluate/transactions/{transactionId}")
+	public ResponseEntity<RuleEvaluationResult> evaluateRuleForTransaction(@PathVariable("id") Long ruleId,
+		@PathVariable Long transactionId) {
+		return ResponseEntity.ok(ruleService.evaluateRuleForTransaction(ruleId, transactionId));
+	}
+
+	@PostMapping("/evaluate/transactions/{transactionId}")
+	public ResponseEntity<List<RuleEvaluationResult>> evaluateActiveRulesForTransaction(@PathVariable Long transactionId) {
+		return ResponseEntity.ok(ruleService.evaluateActiveRulesForTransaction(transactionId));
 	}
 }

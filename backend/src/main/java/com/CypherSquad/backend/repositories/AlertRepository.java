@@ -1,18 +1,10 @@
 package com.CypherSquad.backend.repositories;
 
 import com.CypherSquad.backend.models.Alert;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
-import java.util.Optional;
 
-public interface AlertRepository {
-	Alert save(Alert alert);
-
-	List<Alert> findAll();
-
-	Optional<Alert> findById(Long alertId);
-
-	List<Alert> findByStatus(String status);
-
-	void deleteById(Long alertId);
+public interface AlertRepository extends JpaRepository<Alert, Long> {
+	List<Alert> findByStatusIgnoreCase(String status);
 }

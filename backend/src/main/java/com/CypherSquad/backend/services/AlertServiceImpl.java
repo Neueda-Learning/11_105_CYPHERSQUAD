@@ -39,7 +39,7 @@ public class AlertServiceImpl implements AlertService {
 
 	@Override
 	public List<Alert> getAlertsByStatus(String status) {
-		return alertRepository.findByStatus(status);
+		return alertRepository.findByStatusIgnoreCase(status);
 	}
 
 	@Override
