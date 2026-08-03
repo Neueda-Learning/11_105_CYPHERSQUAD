@@ -2,17 +2,24 @@ package com.CypherSquad.backend.repositories;
 
 import com.CypherSquad.backend.models.Alert;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 public interface AlertRepository {
-	Alert save(Alert alert);
+	Alert createAlert(Alert alert);
 
-	List<Alert> findAll();
+	List<Alert> getAlerts();
 
-	Optional<Alert> findById(Long alertId);
+	Optional<Alert> getAlertById(Long alertId);
 
-	List<Alert> findByStatus(String status);
+	List<Alert> getAlertsByStatus(String status);
 
-	void deleteById(Long alertId);
+	Alert updateAlert(Long alertId, Alert alert);
+
+	Alert updateAlertStatus(Long alertId, String status, LocalDateTime closeDate);
+
+	void deleteAlert(Long alertId);
+
+	Optional<Alert> getAlertByAlertId(Long alertId);
 }

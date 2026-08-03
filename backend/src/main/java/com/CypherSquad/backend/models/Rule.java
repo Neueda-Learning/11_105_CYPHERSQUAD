@@ -1,25 +1,69 @@
 package com.CypherSquad.backend.models;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
+import jakarta.persistence.Table;
+
 import java.math.BigDecimal;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+@Entity
+@Table(name = "rules")
 public class Rule {
 
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "rule_id")
 	private Long ruleId;
+
+	@Column(name = "rule_name", nullable = false, length = 120)
 	private String ruleName;
+
+	@Column(name = "rule_type", nullable = false, length = 80)
 	private String ruleType;
+
+	@Column(name = "metric", length = 80)
 	private String metric;
+
+	@Column(name = "comparison_operator", length = 30)
 	private String comparisonOperator;
+
+	@Column(name = "threshold", precision = 19, scale = 4)
 	private BigDecimal threshold;
+
+	@Column(name = "minimum_threshold", precision = 19, scale = 4)
 	private BigDecimal minimumThreshold;
+
+	@Column(name = "maximum_threshold", precision = 19, scale = 4)
 	private BigDecimal maximumThreshold;
+
+	@Column(name = "transaction_count_threshold")
 	private Integer transactionCountThreshold;
+
+	@Column(name = "time_window_value")
 	private Integer timeWindowValue;
+
+	@Column(name = "time_window_unit", length = 20)
 	private String timeWindowUnit;
+
+	@Column(name = "payee_scope", length = 40)
 	private String payeeScope;
+
+	@Column(name = "severity", length = 20)
 	private String severity;
+
+	@Column(name = "active", nullable = false)
 	private boolean active;
+
+	@Lob
+	@Column(name = "parameters_json")
+	@Convert(converter = RuleParametersConverter.class)
 	private Map<String, Object> parameters = new LinkedHashMap<>();
 
 	public Rule() {
@@ -144,4 +188,6 @@ public class Rule {
 	public void setParameters(Map<String, Object> parameters) {
 		this.parameters = parameters == null ? new LinkedHashMap<>() : parameters;
 	}
+
+	
 }

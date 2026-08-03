@@ -1,16 +1,42 @@
 package com.CypherSquad.backend.models;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
 import java.time.LocalDateTime;
 
+@Entity
+@Table(name = "alerts")
 public class Alert {
 
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "alert_id")
 	private Long alertId;
+
+	@Column(name = "transaction_id")
 	private Long transactionId;
+
+	@Column(name = "rule_id")
 	private Long ruleId;
+
+	@Column(name = "severity", length = 20)
 	private String severity;
+
+	@Column(name = "status", length = 20)
 	private String status;
+
+	@Column(name = "create_date")
 	private LocalDateTime createDate;
+
+	@Column(name = "close_date")
 	private LocalDateTime closeDate;
+
+	@Column(name = "note", length = 1000)
 	private String note;
 
 	public Alert() {
