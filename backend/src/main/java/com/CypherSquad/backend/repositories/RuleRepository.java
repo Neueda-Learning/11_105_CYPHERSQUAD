@@ -1,10 +1,18 @@
 package com.CypherSquad.backend.repositories;
 
 import com.CypherSquad.backend.models.Rule;
-import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
-public interface RuleRepository extends JpaRepository<Rule, Long> {
+public interface RuleRepository {
+	Rule save(Rule rule);
+
+	List<Rule> findAll();
+
+	Optional<Rule> findById(Long ruleId);
+
+	void deleteById(Long ruleId);
+
 	List<Rule> findByActiveTrue();
 }
