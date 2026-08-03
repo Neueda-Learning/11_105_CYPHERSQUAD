@@ -20,6 +20,10 @@ public class Rule {
 	private String payeeScope;
 	private String severity;
 	private boolean active;
+	private String description;
+	private String action;
+	private Integer priority;
+	private String remarks;
 	private Map<String, Object> parameters = new LinkedHashMap<>();
 
 	public Rule() {
@@ -143,5 +147,37 @@ public class Rule {
 
 	public void setParameters(Map<String, Object> parameters) {
 		this.parameters = parameters == null ? new LinkedHashMap<>() : parameters;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public String getAction() {
+		return action;
+	}
+
+	public void setAction(String action) {
+		this.action = action;
+	}
+
+	public Integer getPriority() {
+		return priority;
+	}
+
+	public void setPriority(Integer priority) {
+		this.priority = priority;
+	}
+
+	public String getRemarks() {
+		return remarks;
+	}
+
+	public void setRemarks(String remarks) {
+		this.remarks = remarks;
 	}
 }
