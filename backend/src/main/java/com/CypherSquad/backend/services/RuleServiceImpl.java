@@ -338,7 +338,17 @@ public class RuleServiceImpl implements RuleService {
 		if (operator == null || operator.isBlank()) {
 			return "GREATER_THAN";
 		}
-		return operator.trim().toUpperCase(Locale.ROOT);
+		String normalized = operator.trim().toUpperCase(Locale.ROOT);
+		return switch (normalized) {
+			case "GREATHER_THAN" -> "GREATER_THAN";
+			case "GREATHER_THAN_OR_EQUAL", "GREATHER_THAN_EQUAL" -> "GREATER_THAN_OR_EQUAL";
+			case "GT" -> "GREATER_THAN";
+			case "GTE" -> "GREATER_THAN_OR_EQUAL";
+			case "LT" -> "LESS_THAN";
+			case "LTE" -> "LESS_THAN_OR_EQUAL";
+			case "EQ", "EQUAL_TO" -> "EQUAL";
+			default -> normalized;
+		};
 	}
 
 	private String normalizedValue(String value) {
