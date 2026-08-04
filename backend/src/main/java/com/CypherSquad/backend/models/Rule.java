@@ -8,7 +8,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 
 import java.math.BigDecimal;
 import java.util.LinkedHashMap;
@@ -61,7 +60,10 @@ public class Rule {
 
 	@Column(name = "active", nullable = false)
 	private boolean active;
-	@Transient
+
+	@Lob
+	@Column(name = "parameters_json")
+	@Convert(converter = RuleParametersConverter.class)
 	private Map<String, Object> parameters = new LinkedHashMap<>();
 
 	public Rule() {

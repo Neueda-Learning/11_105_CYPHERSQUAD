@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 public class AlertServiceImpl implements AlertService {
@@ -23,23 +24,23 @@ public class AlertServiceImpl implements AlertService {
 		if (alert.getStatus() == null) {
 			alert.setStatus("OPEN");
 		}
-		return alertRepository.save(alert);
+		return alertRepository.createAlert(alert);
 	}
 
 	@Override
 	public List<Alert> getAlerts() {
-		return alertRepository.findAll();
+		return alertRepository.getAlerts();
 	}
 
 	@Override
 	public Alert getAlertById(Long alertId) {
-		return alertRepository.findById(alertId)
+		return alertRepository.getAlertById(alertId)
 			.orElseThrow(() -> new ResourceNotFoundException("Alert not found: " + alertId));
 	}
 
 	@Override
 	public List<Alert> getAlertsByStatus(String status) {
-		return alertRepository.findByStatusIgnoreCase(status);
+		return alertRepository.getAlertsByStatus(status);
 	}
 
 	@Override
@@ -49,19 +50,35 @@ public class AlertServiceImpl implements AlertService {
 		if (alert.getCreateDate() == null) {
 			alert.setCreateDate(existingAlert.getCreateDate());
 		}
-		return alertRepository.save(alert);
+		return alertRepository.updateAlert(alertId, alert);
+	}
+
+	@Override
+	public Alert updateAlertStatus(Long alertId, String status) {
+		if (status == null || status.isBlank()) {
+			throw new IllegalArgumentException("Status is required");
+		}
+
+		getAlertById(alertId);
+		String normalizedStatus = status.trim().toUpperCase(Locale.ROOT);
+		boolean isClosedStatus = "CLOSED".equals(normalizedStatus)
+			|| "DISMISSED".equals(normalizedStatus)
+			|| "DISSMISSED".equals(normalizedStatus);
+		LocalDateTime closeDate = isClosedStatus ? LocalDateTime.now() : null;
+		return alertRepository.updateAlertStatus(alertId, normalizedStatus, closeDate);
 	}
 
 	@Override
 	public void deleteAlert(Long alertId) {
-		if (alertRepository.findById(alertId).isEmpty()) {
+		if (alertRepository.getAlertById(alertId).isEmpty()) {
 			throw new ResourceNotFoundException("Alert not found: " + alertId);
 		}
-		alertRepository.deleteById(alertId);
+		alertRepository.deleteAlert(alertId);
 	}
 
 	@Override
 	public Alert getAlertByAlertId(Long alertId) {
-		return getAlertById(alertId);
+		return alertRepository.getAlertByAlertId(alertId)
+			.orElseThrow(() -> new ResourceNotFoundException("Alert not found: " + alertId));
 	}
 }
