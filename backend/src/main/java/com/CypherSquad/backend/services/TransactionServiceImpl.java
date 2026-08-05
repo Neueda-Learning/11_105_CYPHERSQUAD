@@ -2,6 +2,8 @@ package com.CypherSquad.backend.services;
 
 import com.CypherSquad.backend.models.Transaction;
 import com.CypherSquad.backend.repositories.TransactionRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -10,6 +12,8 @@ import java.util.List;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {
+	private static final Logger LOGGER = LoggerFactory.getLogger(TransactionServiceImpl.class);
+
 	private final TransactionRepository transactionRepository;
 	private final CurrencyRateService currencyRateService;
 	private final RuleService ruleService;
@@ -34,7 +38,12 @@ public class TransactionServiceImpl implements TransactionService {
 		transaction.setCurrency(normalizedCurrency);
 		transaction.setAmountUsd(currencyRateService.convertToUsd(transaction.getAmount(), normalizedCurrency));
 		Transaction createdTransaction = transactionRepository.save(transaction);
-		ruleService.evaluateActiveRulesForTransaction(createdTransaction.getTransactionId());
+		try {
+			ruleService.evaluateActiveRulesForTransaction(createdTransaction.getTransactionId());
+		} catch (IllegalArgumentException ex) {
+			LOGGER.warn("Transaction {} created, but active rule evaluation skipped due to rule configuration error: {}",
+				createdTransaction.getTransactionId(), ex.getMessage());
+		}
 		return createdTransaction;
 	}
 
