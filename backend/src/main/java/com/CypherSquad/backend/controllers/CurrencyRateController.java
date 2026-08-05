@@ -1,7 +1,9 @@
 package com.CypherSquad.backend.controllers;
 
+import com.CypherSquad.backend.dto.CurrencyRateRequest;
 import com.CypherSquad.backend.models.CurrencyRate;
 import com.CypherSquad.backend.services.CurrencyRateService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -31,8 +33,8 @@ public class CurrencyRateController {
 	}
 
 	@PostMapping
-	public ResponseEntity<CurrencyRate> createCurrency(@RequestBody CurrencyRate currencyRate) {
-		return ResponseEntity.status(HttpStatus.CREATED).body(currencyRateService.createCurrency(currencyRate));
+	public ResponseEntity<CurrencyRate> createCurrency(@Valid @RequestBody CurrencyRateRequest request) {
+		return ResponseEntity.status(HttpStatus.CREATED).body(currencyRateService.createCurrency(toCurrencyRate(request)));
 	}
 
 	@GetMapping("/{id}")
@@ -50,5 +52,14 @@ public class CurrencyRateController {
 	public ResponseEntity<Void> deleteCurrency(@PathVariable("id") Long currencyId) {
 		currencyRateService.deleteCurrency(currencyId);
 		return ResponseEntity.noContent().build();
+	}
+
+	private CurrencyRate toCurrencyRate(CurrencyRateRequest request) {
+		CurrencyRate currencyRate = new CurrencyRate();
+		currencyRate.setCurrencyCode(request.getCurrencyCode());
+		currencyRate.setCurrencyName(request.getCurrencyName());
+		currencyRate.setUsdRate(request.getUsdRate());
+		currencyRate.setActive(request.getActive() == null || request.getActive());
+		return currencyRate;
 	}
 }

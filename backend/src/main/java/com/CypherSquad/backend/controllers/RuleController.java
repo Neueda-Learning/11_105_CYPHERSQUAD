@@ -1,8 +1,10 @@
 package com.CypherSquad.backend.controllers;
 
+import com.CypherSquad.backend.dto.RuleRequest;
 import com.CypherSquad.backend.models.Rule;
 import com.CypherSquad.backend.models.RuleEvaluationResult;
 import com.CypherSquad.backend.services.RuleService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -31,13 +33,13 @@ public class RuleController {
 	}
 
 	@PostMapping
-	public ResponseEntity<Rule> createRule(@RequestBody Rule rule) {
-		return ResponseEntity.status(HttpStatus.CREATED).body(ruleService.createRule(rule));
+	public ResponseEntity<Rule> createRule(@Valid @RequestBody RuleRequest request) {
+		return ResponseEntity.status(HttpStatus.CREATED).body(ruleService.createRule(toRule(request)));
 	}
 
 	@PutMapping("/{id}")
-	public ResponseEntity<Rule> updateRule(@PathVariable("id") Long ruleId, @RequestBody Rule rule) {
-		return ResponseEntity.ok(ruleService.updateRule(ruleId, rule));
+	public ResponseEntity<Rule> updateRule(@PathVariable("id") Long ruleId, @Valid @RequestBody RuleRequest request) {
+		return ResponseEntity.ok(ruleService.updateRule(ruleId, toRule(request)));
 	}
 
 	@GetMapping("/{id}")
@@ -60,5 +62,24 @@ public class RuleController {
 	@PostMapping("/evaluate/transactions/{transactionId}")
 	public ResponseEntity<List<RuleEvaluationResult>> evaluateActiveRulesForTransaction(@PathVariable Long transactionId) {
 		return ResponseEntity.ok(ruleService.evaluateActiveRulesForTransaction(transactionId));
+	}
+
+	private Rule toRule(RuleRequest request) {
+		Rule rule = new Rule();
+		rule.setRuleName(request.getRuleName());
+		rule.setRuleType(request.getRuleType());
+		rule.setMetric(request.getMetric());
+		rule.setComparisonOperator(request.getComparisonOperator());
+		rule.setThreshold(request.getThreshold());
+		rule.setMinimumThreshold(request.getMinimumThreshold());
+		rule.setMaximumThreshold(request.getMaximumThreshold());
+		rule.setTransactionCountThreshold(request.getTransactionCountThreshold());
+		rule.setTimeWindowValue(request.getTimeWindowValue());
+		rule.setTimeWindowUnit(request.getTimeWindowUnit());
+		rule.setPayeeScope(request.getPayeeScope());
+		rule.setSeverity(request.getSeverity());
+		rule.setActive(request.getActive());
+		rule.setParameters(request.getParameters());
+		return rule;
 	}
 }
