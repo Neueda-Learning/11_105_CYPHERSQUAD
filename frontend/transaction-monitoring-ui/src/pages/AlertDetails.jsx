@@ -7,13 +7,21 @@ const AlertDetails = () => {
   const [alert, setAlert] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [actionLoading, setActionLoading] = useState(false);
+  const [actionError, setActionError] = useState("");
 
   useEffect(() => {
     async function load() {
       setLoading(true);
       setError("");
       try {
-        setAlert(await alertApi.getById(id));
+        const fetched = await alertApi.getById(id);
+        if ((fetched.status ?? "").toUpperCase() === "OPEN") {
+          const acknowledged = await alertApi.updateStatus(id, "ACKNOWLEDGED");
+          setAlert(acknowledged);
+        } else {
+          setAlert(fetched);
+        }
       } catch (err) {
         setError(err.message);
       } finally {
@@ -22,6 +30,19 @@ const AlertDetails = () => {
     }
     load();
   }, [id]);
+
+  async function updateStatus(status) {
+    setActionLoading(true);
+    setActionError("");
+    try {
+      const updated = await alertApi.updateStatus(id, status);
+      setAlert(updated);
+    } catch (err) {
+      setActionError(err.message);
+    } finally {
+      setActionLoading(false);
+    }
+  }
 
   return (
     <div className="space-y-4">
@@ -46,6 +67,30 @@ const AlertDetails = () => {
             <div><dt className="text-xs uppercase text-gray-500">Created</dt><dd className="text-sm text-gray-900">{alert.createDate ? new Date(alert.createDate).toLocaleString() : "--"}</dd></div>
             <div><dt className="text-xs uppercase text-gray-500">Closed</dt><dd className="text-sm text-gray-900">{alert.closeDate ? new Date(alert.closeDate).toLocaleString() : "--"}</dd></div>
           </dl>
+        ) : null}
+
+        {!loading && !error && alert ? (
+          <div className="mt-6 rounded-lg border border-gray-200 bg-gray-50 p-4">
+            <p className="text-sm font-medium text-gray-800">Alert Actions</p>
+            <p className="mt-1 text-xs text-gray-500">Opening an OPEN alert marks it as ACKNOWLEDGED automatically.</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <button
+                className="rounded-lg border border-indigo-300 px-3 py-2 text-sm text-indigo-700 disabled:opacity-50"
+                onClick={() => updateStatus("INVESTIGATING")}
+                disabled={actionLoading}
+              >
+                Mark Investigating
+              </button>
+              <button
+                className="rounded-lg border border-amber-300 px-3 py-2 text-sm text-amber-700 disabled:opacity-50"
+                onClick={() => updateStatus("DISMISSED")}
+                disabled={actionLoading}
+              >
+                Dismiss Alert
+              </button>
+            </div>
+            {actionError ? <p className="mt-2 text-xs text-red-600">{actionError}</p> : null}
+          </div>
         ) : null}
       </section>
     </div>

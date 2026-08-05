@@ -63,7 +63,8 @@ public class AlertServiceImpl implements AlertService {
 		String normalizedStatus = status.trim().toUpperCase(Locale.ROOT);
 		boolean isClosedStatus = "CLOSED".equals(normalizedStatus)
 			|| "DISMISSED".equals(normalizedStatus)
-			|| "DISSMISSED".equals(normalizedStatus);
+			|| "DISSMISSED".equals(normalizedStatus)
+			|| "DELETED".equals(normalizedStatus);
 		LocalDateTime closeDate = isClosedStatus ? LocalDateTime.now() : null;
 		return alertRepository.updateAlertStatus(alertId, normalizedStatus, closeDate);
 	}

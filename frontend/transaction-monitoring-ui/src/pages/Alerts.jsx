@@ -5,6 +5,7 @@ import { alertApi } from "../services/api";
 const Alerts = () => {
   const [alerts, setAlerts] = useState([]);
   const [statusFilter, setStatusFilter] = useState("");
+  const [viewMode, setViewMode] = useState("active");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -14,14 +15,18 @@ const Alerts = () => {
   );
 
   useEffect(() => {
-    loadAlerts();
-  }, []);
+    loadAlerts(viewMode);
+  }, [viewMode]);
 
-  async function loadAlerts() {
+  async function loadAlerts(mode = "active") {
     setLoading(true);
     setError("");
     try {
-      setAlerts(await alertApi.getAll());
+      if (mode === "archived") {
+        setAlerts(await alertApi.getByStatus("DELETED"));
+      } else {
+        setAlerts(await alertApi.getAll());
+      }
     } catch (err) {
       setError(err.message);
     } finally {
@@ -31,13 +36,26 @@ const Alerts = () => {
 
   async function onFilterByStatus() {
     if (!statusFilter.trim()) {
-      loadAlerts();
+      loadAlerts(viewMode);
       return;
     }
     setLoading(true);
     setError("");
     try {
       setAlerts(await alertApi.getByStatus(statusFilter.trim().toUpperCase()));
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function onQuickFilter(status) {
+    setLoading(true);
+    setError("");
+    setStatusFilter(status);
+    try {
+      setAlerts(await alertApi.getByStatus(status));
     } catch (err) {
       setError(err.message);
     } finally {
@@ -65,20 +83,48 @@ const Alerts = () => {
     }
   }
 
+  function toggleArchiveView() {
+    setStatusFilter("");
+    setViewMode((current) => (current === "active" ? "archived" : "active"));
+  }
+
   return (
     <div className="space-y-6">
       <section className="rounded-xl border border-gray-200 bg-white p-4 md:p-6">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-lg font-semibold text-gray-900">Alerts</h2>
+          <h2 className="text-lg font-semibold text-gray-900">
+            {viewMode === "archived" ? "Archived Alerts" : "Alerts"}
+          </h2>
           <div className="flex items-center gap-2">
+            <button
+              className="rounded-lg border border-amber-300 px-3 py-2 text-sm text-amber-700"
+              onClick={() => onQuickFilter("ACKNOWLEDGED")}
+              title="Acknowledged alerts"
+            >
+              ✓
+            </button>
+            <button
+              className="rounded-lg border border-indigo-300 px-3 py-2 text-sm text-indigo-700"
+              onClick={() => onQuickFilter("INVESTIGATING")}
+              title="Investigating alerts"
+            >
+              🔎
+            </button>
             <input
               className="rounded-lg border border-gray-300 px-3 py-2 text-sm"
-              placeholder="Filter status (OPEN/CLOSED)"
+              placeholder="Filter status (OPEN, ACKNOWLEDGED, CLOSED...)"
               value={statusFilter}
               onChange={(event) => setStatusFilter(event.target.value)}
             />
             <button className="rounded-lg border border-gray-300 px-3 py-2 text-sm" onClick={onFilterByStatus}>Apply</button>
-            <button className="rounded-lg border border-gray-300 px-3 py-2 text-sm" onClick={loadAlerts}>Reset</button>
+            <button className="rounded-lg border border-gray-300 px-3 py-2 text-sm" onClick={() => loadAlerts(viewMode)}>Reset</button>
+            <button
+              className="rounded-lg border border-gray-300 px-3 py-2 text-sm"
+              onClick={toggleArchiveView}
+              title={viewMode === "archived" ? "Show active alerts" : "Show archived alerts"}
+            >
+              🗂
+            </button>
           </div>
         </div>
 
@@ -114,16 +160,22 @@ const Alerts = () => {
                     <td className="py-3 pr-4">{alert.createDate ? new Date(alert.createDate).toLocaleString() : "--"}</td>
                     <td className="py-3 pr-4">
                       <div className="flex flex-wrap gap-2">
-                        <button
-                          className="rounded border border-green-300 px-2 py-1 text-xs text-green-700 disabled:opacity-50"
-                          onClick={() => onCloseAlert(alert)}
-                          disabled={(alert.status ?? "").toUpperCase() === "CLOSED"}
-                        >
-                          Close
-                        </button>
-                        <button className="rounded border border-red-300 px-2 py-1 text-xs text-red-700" onClick={() => onDeleteAlert(alert.alertId)}>
-                          Delete
-                        </button>
+                        {viewMode === "active" ? (
+                          <>
+                            <button
+                              className="rounded border border-green-300 px-2 py-1 text-xs text-green-700 disabled:opacity-50"
+                              onClick={() => onCloseAlert(alert)}
+                              disabled={(alert.status ?? "").toUpperCase() === "CLOSED"}
+                            >
+                              Close
+                            </button>
+                            <button className="rounded border border-red-300 px-2 py-1 text-xs text-red-700" onClick={() => onDeleteAlert(alert.alertId)}>
+                              Delete
+                            </button>
+                          </>
+                        ) : (
+                          <span className="text-xs text-gray-500">Archived</span>
+                        )}
                       </div>
                     </td>
                   </tr>
