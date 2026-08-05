@@ -2,7 +2,7 @@
 import { Link } from "react-router-dom";
 import { alertApi } from "../services/api";
 
-/* â”€â”€ badge maps â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* badge maps */
 const SEVERITY_CLS = {
   high:     "bg-red-50   text-red-700   ring-1 ring-red-200",
   medium:   "bg-amber-50 text-amber-700 ring-1 ring-amber-200",
@@ -10,11 +10,11 @@ const SEVERITY_CLS = {
   critical: "bg-rose-50  text-rose-700  ring-1 ring-rose-200",
 };
 const STATUS_CLS = {
-  open:           "bg-amber-50   text-amber-700   ring-1 ring-amber-200",
-  closed:         "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200",
-  acknowledged:   "bg-blue-50    text-blue-700    ring-1 ring-blue-200",
-  investigating:  "bg-purple-50  text-purple-700  ring-1 ring-purple-200",
-  dismissed:      "bg-gray-100   text-gray-500    ring-1 ring-gray-200",
+  open:          "bg-amber-50   text-amber-700   ring-1 ring-amber-200",
+  closed:        "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200",
+  acknowledged:  "bg-blue-50    text-blue-700    ring-1 ring-blue-200",
+  investigating: "bg-purple-50  text-purple-700  ring-1 ring-purple-200",
+  dismissed:     "bg-gray-100   text-gray-500    ring-1 ring-gray-200",
 };
 const severityCls = (s = "") => SEVERITY_CLS[s.toLowerCase()] ?? "bg-gray-100 text-gray-500";
 const statusCls   = (s = "") => STATUS_CLS[s.toLowerCase()]   ?? "bg-gray-100 text-gray-500";
@@ -25,7 +25,6 @@ const STATUS_TABS = [
   { label: "Closed", value: "CLOSED" },
 ];
 
-/* â”€â”€ component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 const Alerts = () => {
   const [alerts,    setAlerts]    = useState([]);
   const [activeTab, setActiveTab] = useState("");
@@ -46,14 +45,12 @@ const Alerts = () => {
     }
   }
 
-  /* tab counts */
   const counts = useMemo(() => ({
     "":       alerts.length,
     "OPEN":   alerts.filter((a) => (a.status ?? "").toUpperCase() === "OPEN").length,
     "CLOSED": alerts.filter((a) => (a.status ?? "").toUpperCase() === "CLOSED").length,
   }), [alerts]);
 
-  /* filtered + sorted list */
   const visible = useMemo(() => {
     const list = activeTab
       ? alerts.filter((a) => (a.status ?? "").toUpperCase() === activeTab)
@@ -85,24 +82,22 @@ const Alerts = () => {
     <div className="space-y-6">
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
 
-        {/* â”€â”€ header + tabs â”€â”€ */}
         <div className="px-5 pt-5 pb-0 border-b border-gray-100 dark:border-gray-700">
           <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
             <div>
               <h2 className="text-lg font-bold text-gray-900 dark:text-white tracking-tight">Alerts</h2>
               <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
-                {counts[""] === 0 ? "No alerts" : `${counts[""]} total Â· ${counts["OPEN"]} open`}
+                {counts[""] === 0 ? "No alerts" : `${counts[""]} total · ${counts["OPEN"]} open`}
               </p>
             </div>
             <button
               onClick={loadAlerts}
               className="flex items-center gap-1.5 border border-gray-200 dark:border-gray-700 hover:border-blue-300 hover:text-blue-600 dark:hover:border-blue-500 text-gray-500 dark:text-gray-400 text-xs font-medium px-3 py-2 rounded-lg shadow-sm transition-colors bg-white dark:bg-gray-700"
             >
-              â†» Refresh
+              Refresh
             </button>
           </div>
 
-          {/* status tab bar */}
           <div className="flex gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1 w-fit">
             {STATUS_TABS.map((tab) => (
               <button
@@ -127,14 +122,12 @@ const Alerts = () => {
           </div>
         </div>
 
-        {/* â”€â”€ error â”€â”€ */}
         {error && (
           <div className="mx-5 mt-4 px-4 py-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-700 dark:text-red-400">
             {error}
           </div>
         )}
 
-        {/* â”€â”€ loading â”€â”€ */}
         {loading ? (
           <div className="flex items-center justify-center py-16">
             <div className="w-8 h-8 rounded-full border-4 border-blue-100 border-t-blue-600 animate-spin" />
@@ -167,23 +160,23 @@ const Alerts = () => {
                       </Link>
                     </td>
                     <td className="px-5 py-3.5 text-xs text-gray-600 dark:text-gray-300 font-mono">
-                      {alert.transactionId ? `#${alert.transactionId}` : "â€”"}
+                      {alert.transactionId ? `#${alert.transactionId}` : "—"}
                     </td>
                     <td className="px-5 py-3.5 text-xs text-gray-600 dark:text-gray-300 font-mono">
-                      {alert.ruleId ? `#${alert.ruleId}` : "â€”"}
+                      {alert.ruleId ? `#${alert.ruleId}` : "—"}
                     </td>
                     <td className="px-5 py-3.5">
                       <span className={`inline-flex items-center text-[11px] font-semibold px-2 py-0.5 rounded-full capitalize ${severityCls(alert.severity)}`}>
-                        {alert.severity ?? "â€”"}
+                        {alert.severity ?? "—"}
                       </span>
                     </td>
                     <td className="px-5 py-3.5">
                       <span className={`inline-flex items-center text-[11px] font-semibold px-2 py-0.5 rounded-full capitalize ${statusCls(alert.status)}`}>
-                        {alert.status ?? "â€”"}
+                        {alert.status ?? "—"}
                       </span>
                     </td>
                     <td className="px-5 py-3.5 text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
-                      {alert.createDate ? new Date(alert.createDate).toLocaleString() : "â€”"}
+                      {alert.createDate ? new Date(alert.createDate).toLocaleString() : "—"}
                     </td>
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-2">

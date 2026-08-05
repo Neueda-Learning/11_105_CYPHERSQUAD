@@ -63,7 +63,7 @@ public class AlertRepositoryJdbc implements AlertRepository {
 
 	@Override
 	public List<Alert> getAlerts() {
-		String sql = "SELECT alert_id, transaction_id, rule_id, severity, status, create_date, close_date, note FROM alerts ORDER BY alert_id";
+		String sql = "SELECT alert_id, transaction_id, rule_id, severity, status, create_date, close_date, note FROM alerts WHERE UPPER(COALESCE(status, '')) <> 'DELETED' ORDER BY alert_id";
 		return jdbcTemplate.query(sql, ALERT_ROW_MAPPER);
 	}
 
@@ -109,7 +109,8 @@ public class AlertRepositoryJdbc implements AlertRepository {
 
 	@Override
 	public void deleteAlert(Long alertId) {
-		jdbcTemplate.update("DELETE FROM alerts WHERE alert_id = ?", alertId);
+		String sql = "UPDATE alerts SET status = ?, close_date = ? WHERE alert_id = ?";
+		jdbcTemplate.update(sql, "DELETED", Timestamp.valueOf(LocalDateTime.now()), alertId);
 	}
 
 	@Override

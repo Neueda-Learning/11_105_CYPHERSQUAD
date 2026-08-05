@@ -1,4 +1,4 @@
-import { useLocation } from 'react-router-dom';
+import { useLocation, NavLink } from 'react-router-dom';
 import { useTheme } from '../../context/ThemeContext';
 
 const PAGE_TITLES = {
@@ -57,10 +57,16 @@ const Navbar = ({ onMenuToggle }) => {
         </button>
 
         {/* Notification Bell */}
-        <button className="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+        <NavLink
+          to="/alerts"
+          className={({ isActive }) =>
+            `relative p-2 rounded-lg transition-colors ${isActive ? 'bg-blue-50' : 'hover:bg-gray-100'}`
+          }
+          aria-label="Open alerts"
+        >
           <span className="text-xl">🔔</span>
           <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
-        </button>
+        </NavLink>
 
         {/* User Avatar */}
         <div className="flex items-center gap-2">
