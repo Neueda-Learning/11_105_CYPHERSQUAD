@@ -2,8 +2,8 @@ import React, { StrictMode } from 'react';
 import ReactDOM from 'react-dom/client';
 import { RouterProvider } from 'react-router-dom';
 import { router } from './routes/AppRoutes';
+import { ThemeProvider } from './context/ThemeContext';
 import './index.css';
-import './App.css';
 
 /* ── Error Boundary ─────────────────────────────────────────── */
 class ErrorBoundary extends React.Component {
@@ -41,9 +41,11 @@ class ErrorBoundary extends React.Component {
 /* ── Mount ──────────────────────────────────────────────────── */
 ReactDOM.createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <ErrorBoundary>
-      <RouterProvider router={router} />
-    </ErrorBoundary>
+    <ThemeProvider>
+      <ErrorBoundary>
+        <RouterProvider router={router} />
+      </ErrorBoundary>
+    </ThemeProvider>
   </StrictMode>
 );
 

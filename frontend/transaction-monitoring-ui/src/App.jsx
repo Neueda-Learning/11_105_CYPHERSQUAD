@@ -1,8 +1,5 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+// App.jsx is not rendered by main.jsx (RouterProvider is used directly).
+// Kept as a placeholder — safe to delete this file.
 
 function App() {
  

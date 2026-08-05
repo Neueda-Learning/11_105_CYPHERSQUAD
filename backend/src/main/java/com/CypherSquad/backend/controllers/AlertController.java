@@ -58,8 +58,4 @@ public class AlertController {
 		return ResponseEntity.noContent().build();
 	}
 
-	@GetMapping("/alertId/{alertId}")
-	public ResponseEntity<Alert> getAlertByAlertId(@PathVariable Long alertId) {
-		return ResponseEntity.status(HttpStatus.OK).body(alertService.getAlertByAlertId(alertId));
-	}
 }
