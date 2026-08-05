@@ -39,10 +39,9 @@ const AlertDetails = () => {
             <div><dt className="text-xs uppercase text-gray-500">Alert ID</dt><dd className="text-sm text-gray-900">{alert.alertId}</dd></div>
             <div><dt className="text-xs uppercase text-gray-500">Rule ID</dt><dd className="text-sm text-gray-900">{alert.ruleId ?? "--"}</dd></div>
             <div><dt className="text-xs uppercase text-gray-500">Transaction ID</dt><dd className="text-sm text-gray-900">{alert.transactionId ?? "--"}</dd></div>
-            <div><dt className="text-xs uppercase text-gray-500">Account ID</dt><dd className="text-sm text-gray-900">{alert.accountId ?? "--"}</dd></div>
             <div><dt className="text-xs uppercase text-gray-500">Severity</dt><dd className="text-sm text-gray-900">{alert.severity ?? "--"}</dd></div>
             <div><dt className="text-xs uppercase text-gray-500">Status</dt><dd className="text-sm text-gray-900">{alert.status ?? "--"}</dd></div>
-            <div><dt className="text-xs uppercase text-gray-500">Description</dt><dd className="text-sm text-gray-900">{alert.description ?? "--"}</dd></div>
+            <div><dt className="text-xs uppercase text-gray-500">Note</dt><dd className="text-sm text-gray-900">{alert.note ?? "--"}</dd></div>
             <div><dt className="text-xs uppercase text-gray-500">Created</dt><dd className="text-sm text-gray-900">{alert.createDate ? new Date(alert.createDate).toLocaleString() : "--"}</dd></div>
             <div><dt className="text-xs uppercase text-gray-500">Closed</dt><dd className="text-sm text-gray-900">{alert.closeDate ? new Date(alert.closeDate).toLocaleString() : "--"}</dd></div>
           </dl>

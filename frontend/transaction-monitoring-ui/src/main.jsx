@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom/client';
 import { RouterProvider } from 'react-router-dom';
 import { router } from './routes/AppRoutes';
 import './index.css';
-import './App.css';
 
 /* ── Error Boundary ─────────────────────────────────────────── */
 class ErrorBoundary extends React.Component {

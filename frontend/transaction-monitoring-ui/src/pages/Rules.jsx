@@ -165,6 +165,12 @@ const Rules = () => {
           <label className="text-sm font-medium text-gray-700">Threshold
             <input className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2" name="threshold" type="number" step="0.0001" value={formData.threshold} onChange={onChange} />
           </label>
+          <label className="text-sm font-medium text-gray-700">Min Threshold <span className="text-gray-400 font-normal">(AMOUNT_RANGE)</span>
+            <input className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2" name="minimumThreshold" type="number" step="0.0001" value={formData.minimumThreshold} onChange={onChange} />
+          </label>
+          <label className="text-sm font-medium text-gray-700">Max Threshold <span className="text-gray-400 font-normal">(AMOUNT_RANGE)</span>
+            <input className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2" name="maximumThreshold" type="number" step="0.0001" value={formData.maximumThreshold} onChange={onChange} />
+          </label>
           <label className="text-sm font-medium text-gray-700">Transaction Count Threshold
             <input className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2" name="transactionCountThreshold" type="number" min="1" value={formData.transactionCountThreshold} onChange={onChange} />
           </label>
