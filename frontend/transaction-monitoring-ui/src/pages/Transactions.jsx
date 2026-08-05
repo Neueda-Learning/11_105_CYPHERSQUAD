@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { transactionApi } from "../services/api";
+import { currencyApi, transactionApi } from "../services/api";
 
 const INITIAL_FORM = {
   accountId: "",
   payeeId: "",
   amount: "",
-  currency: "USD",
+  currency: "",
   type: "DEBIT",
   status: "SUCCESS",
 };
@@ -18,11 +18,18 @@ function formatUsd(value) {
 
 const Transactions = () => {
   const [transactions, setTransactions] = useState([]);
+  const [currencies, setCurrencies] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currencyLoading, setCurrencyLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [formError, setFormError] = useState("");
   const [formData, setFormData] = useState(INITIAL_FORM);
+
+  const activeCurrencies = useMemo(
+    () => currencies.filter((currency) => currency.active).sort((a, b) => a.currencyCode.localeCompare(b.currencyCode)),
+    [currencies]
+  );
 
   const sortedTransactions = useMemo(
     () => [...transactions].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)),
@@ -31,6 +38,7 @@ const Transactions = () => {
 
   useEffect(() => {
     loadTransactions();
+    loadCurrencies();
   }, []);
 
   async function loadTransactions() {
@@ -43,6 +51,28 @@ const Transactions = () => {
       setError(err.message);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function loadCurrencies() {
+    setCurrencyLoading(true);
+    try {
+      const data = await currencyApi.getAll();
+      setCurrencies(data);
+
+      const active = data.filter((currency) => currency.active);
+      if (active.length > 0) {
+        setFormData((current) => {
+          if (current.currency) {
+            return current;
+          }
+          return { ...current, currency: active[0].currencyCode };
+        });
+      }
+    } catch (err) {
+      setFormError(err.message);
+    } finally {
+      setCurrencyLoading(false);
     }
   }
 
@@ -70,9 +100,16 @@ const Transactions = () => {
         throw new Error("accountId and amount are required");
       }
 
+      if (!payload.currency) {
+        throw new Error("Select a currency from configured currency rates");
+      }
+
       const created = await transactionApi.create(payload);
       setTransactions((current) => [created, ...current]);
-      setFormData(INITIAL_FORM);
+      setFormData((current) => ({
+        ...INITIAL_FORM,
+        currency: current.currency,
+      }));
     } catch (err) {
       setFormError(err.message);
     } finally {
@@ -128,14 +165,26 @@ const Transactions = () => {
 
           <label className="text-sm font-medium text-gray-700">
             Currency
-            <input
-              className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 uppercase"
+            <select
+              className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
               name="currency"
-              maxLength={10}
               value={formData.currency}
               onChange={onChange}
               required
-            />
+              disabled={currencyLoading || activeCurrencies.length === 0}
+            >
+              {currencyLoading ? <option value="">Loading currencies...</option> : null}
+              {!currencyLoading && activeCurrencies.length === 0 ? (
+                <option value="">No active currencies available</option>
+              ) : null}
+              {!currencyLoading && activeCurrencies.length > 0
+                ? activeCurrencies.map((currency) => (
+                    <option key={currency.currencyId} value={currency.currencyCode}>
+                      {currency.currencyCode} - {currency.currencyName}
+                    </option>
+                  ))
+                : null}
+            </select>
           </label>
 
           <label className="text-sm font-medium text-gray-700">
@@ -159,7 +208,7 @@ const Transactions = () => {
             <button
               className="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white disabled:bg-blue-300"
               type="submit"
-              disabled={submitting}
+              disabled={submitting || currencyLoading || activeCurrencies.length === 0}
             >
               {submitting ? "Creating..." : "Create Transaction"}
             </button>
