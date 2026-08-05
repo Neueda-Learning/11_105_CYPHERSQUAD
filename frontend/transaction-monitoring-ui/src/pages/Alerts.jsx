@@ -15,29 +15,39 @@ const STATUS_CLS = {
   acknowledged:  "bg-blue-50    text-blue-700    ring-1 ring-blue-200",
   investigating: "bg-purple-50  text-purple-700  ring-1 ring-purple-200",
   dismissed:     "bg-gray-100   text-gray-500    ring-1 ring-gray-200",
+  deleted:       "bg-slate-100  text-slate-600   ring-1 ring-slate-300",
 };
 const severityCls = (s = "") => SEVERITY_CLS[s.toLowerCase()] ?? "bg-gray-100 text-gray-500";
 const statusCls   = (s = "") => STATUS_CLS[s.toLowerCase()]   ?? "bg-gray-100 text-gray-500";
 
-const STATUS_TABS = [
-  { label: "All",    value: "" },
-  { label: "Open",   value: "OPEN" },
+const STATUS_FILTERS = [
+  { label: "All", value: "" },
+  { label: "Open", value: "OPEN" },
+  { label: "Acknowledged", value: "ACKNOWLEDGED" },
+  { label: "Investigating", value: "INVESTIGATING" },
   { label: "Closed", value: "CLOSED" },
+  { label: "Dismissed", value: "DISMISSED" },
 ];
 
 const Alerts = () => {
-  const [alerts,    setAlerts]    = useState([]);
-  const [activeTab, setActiveTab] = useState("");
-  const [loading,   setLoading]   = useState(true);
-  const [error,     setError]     = useState("");
+  const [alerts, setAlerts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [showArchive, setShowArchive] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState("");
+  const [appliedStatus, setAppliedStatus] = useState("");
+  const [quickStatus, setQuickStatus] = useState("");
 
-  useEffect(() => { loadAlerts(); }, []);
+  useEffect(() => {
+    loadAlerts(showArchive);
+  }, [showArchive]);
 
-  async function loadAlerts() {
+  async function loadAlerts(archiveMode = showArchive) {
     setLoading(true);
     setError("");
     try {
-      setAlerts(await alertApi.getAll());
+      const list = archiveMode ? await alertApi.getByStatus("DELETED") : await alertApi.getAll();
+      setAlerts(list);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -46,17 +56,35 @@ const Alerts = () => {
   }
 
   const counts = useMemo(() => ({
-    "":       alerts.length,
-    "OPEN":   alerts.filter((a) => (a.status ?? "").toUpperCase() === "OPEN").length,
-    "CLOSED": alerts.filter((a) => (a.status ?? "").toUpperCase() === "CLOSED").length,
+    all: alerts.length,
+    acknowledged: alerts.filter((a) => (a.status ?? "").toUpperCase() === "ACKNOWLEDGED").length,
+    investigating: alerts.filter((a) => (a.status ?? "").toUpperCase() === "INVESTIGATING").length,
   }), [alerts]);
 
   const visible = useMemo(() => {
-    const list = activeTab
-      ? alerts.filter((a) => (a.status ?? "").toUpperCase() === activeTab)
+    const statusFilter = quickStatus || appliedStatus;
+    const list = statusFilter
+      ? alerts.filter((a) => (a.status ?? "").toUpperCase() === statusFilter)
       : [...alerts];
     return list.sort((a, b) => new Date(b.createDate) - new Date(a.createDate));
-  }, [alerts, activeTab]);
+  }, [alerts, appliedStatus, quickStatus]);
+
+  function onApplyFilters() {
+    setQuickStatus("");
+    setAppliedStatus(selectedStatus);
+  }
+
+  function onResetFilters() {
+    setSelectedStatus("");
+    setAppliedStatus("");
+    setQuickStatus("");
+  }
+
+  function onQuickFilter(status) {
+    setSelectedStatus(status);
+    setAppliedStatus("");
+    setQuickStatus((prev) => (prev === status ? "" : status));
+  }
 
   async function onCloseAlert(alert) {
     setError("");
@@ -87,38 +115,93 @@ const Alerts = () => {
             <div>
               <h2 className="text-lg font-bold text-gray-900 dark:text-white tracking-tight">Alerts</h2>
               <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
-                {counts[""] === 0 ? "No alerts" : `${counts[""]} total · ${counts["OPEN"]} open`}
+                {showArchive
+                  ? `${counts.all} deleted alerts`
+                  : (counts.all === 0 ? "No alerts" : `${counts.all} total · ${counts.acknowledged} acknowledged · ${counts.investigating} investigating`) }
               </p>
             </div>
             <button
-              onClick={loadAlerts}
+              onClick={() => loadAlerts(showArchive)}
               className="flex items-center gap-1.5 border border-gray-200 dark:border-gray-700 hover:border-blue-300 hover:text-blue-600 dark:hover:border-blue-500 text-gray-500 dark:text-gray-400 text-xs font-medium px-3 py-2 rounded-lg shadow-sm transition-colors bg-white dark:bg-gray-700"
             >
               Refresh
             </button>
           </div>
 
-          <div className="flex gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1 w-fit">
-            {STATUS_TABS.map((tab) => (
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
               <button
-                key={tab.value}
-                onClick={() => setActiveTab(tab.value)}
+                type="button"
+                title="Show acknowledged alerts"
+                onClick={() => onQuickFilter("ACKNOWLEDGED")}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
-                  activeTab === tab.value
-                    ? "bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm"
-                    : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                  quickStatus === "ACKNOWLEDGED"
+                    ? "bg-blue-100 text-blue-700 ring-1 ring-blue-300"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                 }`}
               >
-                {tab.label}
-                <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-semibold tabular-nums ${
-                  activeTab === tab.value
-                    ? "bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300"
-                    : "bg-gray-200 dark:bg-gray-600 text-gray-500 dark:text-gray-400"
-                }`}>
-                  {counts[tab.value]}
-                </span>
+                <span aria-hidden="true">✓</span>
+                Acknowledged
               </button>
-            ))}
+              <button
+                type="button"
+                title="Show investigating alerts"
+                onClick={() => onQuickFilter("INVESTIGATING")}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                  quickStatus === "INVESTIGATING"
+                    ? "bg-purple-100 text-purple-700 ring-1 ring-purple-300"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}
+              >
+                <span aria-hidden="true">🔎</span>
+                Investigating
+              </button>
+
+              <div className="flex items-center gap-2 rounded-lg border border-gray-200 px-2 py-1.5">
+                <select
+                  className="rounded border border-gray-300 px-2 py-1 text-xs"
+                  value={selectedStatus}
+                  onChange={(event) => setSelectedStatus(event.target.value)}
+                >
+                  {STATUS_FILTERS.map((option) => (
+                    <option key={option.value} value={option.value}>{option.label}</option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={onApplyFilters}
+                  className="rounded border border-blue-300 px-2 py-1 text-xs text-blue-700"
+                >
+                  Apply
+                </button>
+                <button
+                  type="button"
+                  onClick={onResetFilters}
+                  className="rounded border border-gray-300 px-2 py-1 text-xs text-gray-700"
+                >
+                  Reset
+                </button>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              title={showArchive ? "Show active alerts" : "Show deleted alerts archive"}
+              onClick={() => {
+                setShowArchive((prev) => !prev);
+                setSelectedStatus("");
+                setAppliedStatus("");
+                setQuickStatus("");
+              }}
+              className={`rounded-lg border px-3 py-2 text-xs font-medium transition-colors ${
+                showArchive
+                  ? "border-slate-300 bg-slate-100 text-slate-700"
+                  : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+              }`}
+            >
+              <span aria-hidden="true" className="mr-1">🗂</span>
+              {showArchive ? "Archive View" : "Archive"}
+            </button>
           </div>
         </div>
 
@@ -179,21 +262,25 @@ const Alerts = () => {
                       {alert.createDate ? new Date(alert.createDate).toLocaleString() : "—"}
                     </td>
                     <td className="px-5 py-3.5">
-                      <div className="flex items-center gap-2">
-                        <button
-                          className="text-xs font-medium px-2.5 py-1 rounded-lg border border-emerald-200 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-800 dark:text-emerald-400 dark:hover:bg-emerald-900/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                          onClick={() => onCloseAlert(alert)}
-                          disabled={(alert.status ?? "").toUpperCase() === "CLOSED"}
-                        >
-                          Close
-                        </button>
-                        <button
-                          className="text-xs font-medium px-2.5 py-1 rounded-lg border border-red-200 text-red-700 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/20 transition-colors"
-                          onClick={() => onDeleteAlert(alert.alertId)}
-                        >
-                          Delete
-                        </button>
-                      </div>
+                      {showArchive ? (
+                        <span className="text-xs text-gray-400">Archived</span>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <button
+                            className="text-xs font-medium px-2.5 py-1 rounded-lg border border-emerald-200 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-800 dark:text-emerald-400 dark:hover:bg-emerald-900/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                            onClick={() => onCloseAlert(alert)}
+                            disabled={(alert.status ?? "").toUpperCase() === "CLOSED"}
+                          >
+                            Close
+                          </button>
+                          <button
+                            className="text-xs font-medium px-2.5 py-1 rounded-lg border border-red-200 text-red-700 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/20 transition-colors"
+                            onClick={() => onDeleteAlert(alert.alertId)}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -203,7 +290,7 @@ const Alerts = () => {
             {visible.length === 0 && (
               <div className="py-16 text-center">
                 <p className="text-sm font-medium text-gray-400 dark:text-gray-500">
-                  {activeTab ? `No ${activeTab.toLowerCase()} alerts` : "No alerts found"}
+                  {showArchive ? "No deleted alerts found" : "No alerts found"}
                 </p>
               </div>
             )}
