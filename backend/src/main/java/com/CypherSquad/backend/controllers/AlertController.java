@@ -47,7 +47,7 @@ public class AlertController {
 		return ResponseEntity.ok(alertService.updateAlertStatus(alertId, payload.get("status")));
 	}
 
-	@GetMapping("/{status:[A-Za-z][A-Za-z0-9_-]*}")
+	@GetMapping("/status/{status}")
 	public ResponseEntity<List<Alert>> getAlertsByStatus(@PathVariable String status) {
 		return ResponseEntity.ok(alertService.getAlertsByStatus(status));
 	}
