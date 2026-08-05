@@ -17,15 +17,15 @@ const SummaryCard = ({ title, value, subtitle, icon, colorClass, trend }) => {
   const iconColor = ICON_COLOR[colorClass] ?? 'text-blue-600';
 
   return (
-    <div className={`bg-white rounded-xl shadow-sm border border-gray-100 border-t-4 ${accent} p-5 flex items-start gap-4 hover:shadow-md transition-shadow`}>
-      <div className={`rounded-xl p-3 ${colorClass ?? 'bg-blue-50'} shrink-0`}>
+    <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 border-t-4 ${accent} p-5 flex items-start gap-4 hover:shadow-md transition-shadow`}>
+      <div className={`rounded-xl p-3 ${colorClass ?? 'bg-blue-50'} dark:opacity-80 shrink-0`}>
         <span className={`text-xl font-bold ${iconColor}`}>{icon}</span>
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 truncate">{title}</p>
-        <p className="text-3xl font-extrabold text-gray-900 mt-0.5 leading-none">{value}</p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500 truncate">{title}</p>
+        <p className="text-3xl font-extrabold text-gray-900 dark:text-white mt-0.5 leading-none">{value}</p>
         {subtitle && (
-          <p className="text-xs text-gray-400 mt-1.5">{subtitle}</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1.5">{subtitle}</p>
         )}
       </div>
       {trend !== undefined && (

@@ -8,12 +8,12 @@ const BarChart = ({ title, subtitle, data, total, barColor, badgeClass, emptyLab
   const max = Math.max(...data.map((d) => d.value), 1);
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
       {/* Header */}
       <div className="flex items-start justify-between mb-5">
         <div>
-          <h3 className="text-sm font-semibold text-gray-800">{title}</h3>
-          <p className="text-xs text-gray-400 mt-0.5">{subtitle}</p>
+          <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100">{title}</h3>
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{subtitle}</p>
         </div>
         <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${badgeClass}`}>
           {total} total
@@ -26,52 +26,60 @@ const BarChart = ({ title, subtitle, data, total, barColor, badgeClass, emptyLab
         {/* Horizontal grid lines (top 80% = bar zone) */}
         <div className="absolute inset-x-0 top-0 bottom-9 flex flex-col justify-between pointer-events-none">
           {Array.from({ length: GRID_LINES + 1 }).map((_, i) => (
-            <div key={i} className="w-full border-t border-gray-100" />
+            <div key={i} className="w-full border-t border-gray-100 dark:border-gray-700/50" />
           ))}
         </div>
 
         {/* y-axis max label */}
-        <span className="absolute top-0 left-0 text-[10px] text-gray-300 -translate-y-1/2 select-none">
+        <span className="absolute top-0 left-0 text-[10px] text-gray-300 dark:text-gray-600 -translate-y-1/2 select-none">
           {max}
         </span>
 
-        {/* Bars */}
-        <div className="absolute inset-x-0 top-0 bottom-9 flex items-end gap-2 px-1">
+        {/* Bar columns */}
+        <div className="absolute inset-x-0 top-0 bottom-9 flex gap-2 px-1">
           {total === 0
             ? /* ghost bars */ data.map((d, i) => (
-                <div key={i} className="flex-1 flex flex-col items-center">
+                <div key={i} className="flex-1 h-full flex flex-col justify-end">
                   <div
-                    className="w-full rounded-t-md bg-gray-100"
+                    className="w-full rounded-t-md bg-gray-100 dark:bg-gray-700"
                     style={{ height: `${GHOST_HEIGHTS[i % GHOST_HEIGHTS.length]}%` }}
                   />
                 </div>
               ))
-            : data.map((d, i) => (
-                <div key={i} className="flex-1 flex flex-col items-end group">
-                  {/* value label — always visible, hidden when 0 */}
-                  <span className={`text-[11px] font-semibold mb-1 transition-colors ${d.value > 0 ? 'text-gray-500 group-hover:text-gray-800' : 'text-transparent'}`}>
-                    {d.value > 0 ? d.value : '·'}
-                  </span>
-                  <div
-                    className={`w-full rounded-t-md transition-all duration-500 ease-out group-hover:brightness-110 ${barColor}`}
-                    style={{
-                      height: `calc(${(d.value / max) * 100}% - 20px)`,
-                      minHeight: d.value ? '4px' : '0',
-                    }}
-                  />
-                </div>
-              ))
+            : data.map((d, i) => {
+                const pct = (d.value / max) * 100;
+                return (
+                  <div key={i} className="flex-1 h-full flex flex-col justify-end items-center relative group">
+                    {/* value label floats above bar top */}
+                    {d.value > 0 && (
+                      <span
+                        className="absolute text-[11px] font-semibold text-gray-500 dark:text-gray-400 group-hover:text-gray-800 dark:group-hover:text-gray-200 transition-colors"
+                        style={{ bottom: `calc(${pct}% + 5px)` }}
+                      >
+                        {d.value}
+                      </span>
+                    )}
+                    <div
+                      className={`w-full rounded-t-md transition-all duration-500 ease-out group-hover:brightness-110 ${barColor}`}
+                      style={{
+                        height: `${pct}%`,
+                        minHeight: d.value ? '4px' : '0',
+                      }}
+                    />
+                  </div>
+                );
+              })
           }
         </div>
 
         {/* x-axis line */}
-        <div className="absolute inset-x-0 bottom-9 border-t-2 border-gray-200" />
+        <div className="absolute inset-x-0 bottom-9 border-t-2 border-gray-200 dark:border-gray-600" />
 
         {/* Day labels */}
         <div className="absolute inset-x-0 bottom-0 h-9 flex items-center gap-2 px-1">
           {data.map((d, i) => (
             <div key={i} className="flex-1 flex justify-center">
-              <span className="text-[11px] text-gray-400 font-medium">{d.label}</span>
+              <span className="text-[11px] text-gray-400 dark:text-gray-500 font-medium">{d.label}</span>
             </div>
           ))}
         </div>
@@ -79,7 +87,7 @@ const BarChart = ({ title, subtitle, data, total, barColor, badgeClass, emptyLab
         {/* Empty overlay message */}
         {total === 0 && (
           <div className="absolute inset-0 bottom-9 flex items-center justify-center">
-            <span className="text-xs text-gray-400 bg-white/90 px-3 py-1.5 rounded-lg border border-gray-100 shadow-sm">
+            <span className="text-xs text-gray-400 dark:text-gray-500 bg-white/90 dark:bg-gray-800/90 px-3 py-1.5 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm">
               {emptyLabel ?? 'No data for this period'}
             </span>
           </div>
@@ -104,15 +112,15 @@ const DonutChart = ({ title, subtitle, data = [] }) => {
     });
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
       <div className="mb-5">
-        <h3 className="text-sm font-semibold text-gray-800">{title}</h3>
-        <p className="text-xs text-gray-400 mt-0.5">{subtitle}</p>
+        <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100">{title}</h3>
+        <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{subtitle}</p>
       </div>
 
       {total === 0 ? (
         <div className="h-40 flex items-center justify-center">
-          <p className="text-sm text-gray-300">No data available</p>
+          <p className="text-sm text-gray-300 dark:text-gray-600">No data available</p>
         </div>
       ) : (
         <div className="flex items-center gap-6">
@@ -139,8 +147,8 @@ const DonutChart = ({ title, subtitle, data = [] }) => {
             </svg>
             {/* centre label */}
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <span className="text-xl font-extrabold text-gray-800 leading-none">{total}</span>
-              <span className="text-[9px] text-gray-400 uppercase tracking-widest mt-0.5">total</span>
+              <span className="text-xl font-extrabold text-gray-800 dark:text-gray-100 leading-none">{total}</span>
+              <span className="text-[9px] text-gray-400 dark:text-gray-500 uppercase tracking-widest mt-0.5">total</span>
             </div>
           </div>
 
@@ -150,11 +158,11 @@ const DonutChart = ({ title, subtitle, data = [] }) => {
               <div key={i} className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2 min-w-0">
                   <div className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ backgroundColor: d.color }} />
-                  <span className="text-xs text-gray-600 truncate capitalize">{d.label}</span>
+                  <span className="text-xs text-gray-600 dark:text-gray-400 truncate capitalize">{d.label}</span>
                 </div>
                 <div className="flex items-center gap-1.5 shrink-0">
-                  <span className="text-xs font-semibold text-gray-800">{d.value}</span>
-                  <span className="text-[10px] text-gray-400 w-7 text-right">
+                  <span className="text-xs font-semibold text-gray-800 dark:text-gray-200">{d.value}</span>
+                  <span className="text-[10px] text-gray-400 dark:text-gray-500 w-7 text-right">
                     {Math.round((d.value / total) * 100)}%
                   </span>
                 </div>
