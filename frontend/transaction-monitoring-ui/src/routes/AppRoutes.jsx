@@ -8,6 +8,7 @@ import TransactionDetails from "../pages/TransactionDetails";
 import Alerts from "../pages/Alerts";
 import AlertDetails from "../pages/AlertDetails";
 import Rules from "../pages/Rules";
+import Currency from "../pages/Currency";
 import NotFound from "../pages/NotFound";
 
 export const router = createBrowserRouter([
@@ -38,6 +39,10 @@ export const router = createBrowserRouter([
       {
         path: "rules",
         element: <Rules />,
+      },
+      {
+        path: "currency",
+        element: <Currency />,
       },
     ],
   },

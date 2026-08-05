@@ -8,7 +8,7 @@ const PAGE_TITLES = {
   '/currency': 'Currency Rates',
 };
 
-const Navbar = () => {
+const Navbar = ({ onMenuToggle }) => {
   const { pathname } = useLocation();
   const title = PAGE_TITLES[pathname] ?? 'Transaction Monitor';
   const today = new Date().toLocaleDateString('en-US', {
@@ -20,9 +20,19 @@ const Navbar = () => {
 
   return (
     <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 shadow-sm">
-      <div>
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          className="md:hidden rounded-lg border border-gray-200 p-2 text-gray-600"
+          onClick={onMenuToggle}
+          aria-label="Open menu"
+        >
+          ☰
+        </button>
+        <div>
         <h1 className="text-lg font-semibold text-gray-800">{title}</h1>
         <p className="text-xs text-gray-400">{today}</p>
+        </div>
       </div>
 
       <div className="flex items-center gap-4">
@@ -38,7 +48,7 @@ const Navbar = () => {
             A
           </div>
           <div className="hidden sm:block">
-            <p className="text-sm font-medium text-gray-700">Admin</p>
+            <p className="text-sm font-medium text-gray-700">User</p>
             <p className="text-xs text-gray-400">Analyst</p>
           </div>
         </div>
