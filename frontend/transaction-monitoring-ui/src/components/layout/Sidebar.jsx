@@ -1,37 +1,51 @@
 import { NavLink } from "react-router-dom";
 
-const Sidebar = () => {
+const Sidebar = ({ open = false, onClose }) => {
   const linkStyle = ({ isActive }) =>
-    `block rounded-lg px-4 py-2 transition ${
+    `block rounded-lg px-4 py-2 transition font-medium ${
       isActive
         ? "bg-blue-600 text-white"
         : "text-gray-700 hover:bg-gray-200"
     }`;
 
   return (
-    <aside className="h-screen w-64 border-r bg-white p-4 shadow-md">
+    <>
+      <div
+        className={`fixed inset-0 z-30 bg-black/40 transition-opacity md:hidden ${open ? "opacity-100" : "pointer-events-none opacity-0"}`}
+        onClick={onClose}
+      />
+      <aside
+        className={`fixed inset-y-0 left-0 z-40 h-screen w-64 border-r bg-white p-4 shadow-md transition-transform md:static md:translate-x-0 ${
+          open ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
       <h2 className="mb-8 text-2xl font-bold text-blue-600">
         TM Dashboard
       </h2>
 
       <nav className="flex flex-col gap-2">
-        <NavLink to="/" end className={linkStyle}>
+        <NavLink to="/" end className={linkStyle} onClick={onClose}>
           Dashboard
         </NavLink>
 
-        <NavLink to="/transactions" className={linkStyle}>
+        <NavLink to="/transactions" className={linkStyle} onClick={onClose}>
           Transactions
         </NavLink>
 
-        <NavLink to="/alerts" className={linkStyle}>
+        <NavLink to="/alerts" className={linkStyle} onClick={onClose}>
           Alerts
         </NavLink>
 
-        <NavLink to="/rules" className={linkStyle}>
+        <NavLink to="/rules" className={linkStyle} onClick={onClose}>
           Rules
         </NavLink>
+
+        <NavLink to="/currency" className={linkStyle} onClick={onClose}>
+          Currency
+        </NavLink>
       </nav>
-    </aside>
+      </aside>
+    </>
   );
 };
 

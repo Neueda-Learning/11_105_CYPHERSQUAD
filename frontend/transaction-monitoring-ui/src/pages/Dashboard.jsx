@@ -3,7 +3,7 @@ import SummaryCard from '../components/layout/SummaryCard';
 import Charts from '../components/layout/Charts';
 import { transactionApi, alertApi, ruleApi, currencyApi } from '../services/api';
 
-/* â”€â”€ helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* helpers */
 const STATUS_BADGE = {
   completed: 'bg-emerald-100 text-emerald-700',
   pending:   'bg-yellow-100  text-yellow-700',
@@ -25,12 +25,12 @@ function severityBadge(severity = '') {
 }
 
 function formatUsd(value) {
-  if (value == null) return 'â€”';
+  if (value == null) return '--';
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
 }
 
 function timeAgo(dateStr) {
-  if (!dateStr) return 'â€”';
+  if (!dateStr) return '--';
   const secs = (Date.now() - new Date(dateStr)) / 1000;
   if (secs < 60)    return 'just now';
   if (secs < 3600)  return `${Math.floor(secs / 60)} min ago`;
@@ -61,7 +61,7 @@ function buildChartData(items, dateField) {
   }));
 }
 
-/* â”€â”€ component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* component */
 const Dashboard = () => {
   const [transactions, setTransactions] = useState([]);
   const [alerts,       setAlerts]       = useState([]);
@@ -87,7 +87,7 @@ const Dashboard = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  /* â”€â”€ derived stats â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  /* derived stats */
   const activeAlerts     = alerts.filter((a) => a.status?.toLowerCase() !== 'closed');
   const highAlerts       = activeAlerts.filter((a) => a.severity?.toLowerCase() === 'high');
   const activeRules      = rules.filter((r) => r.active);
@@ -107,13 +107,13 @@ const Dashboard = () => {
   const txChartData    = buildChartData(transactions, 'timestamp');
   const alertChartData = buildChartData(alerts,       'createDate');
 
-  /* â”€â”€ loading / error â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  /* loading / error */
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="flex flex-col items-center gap-3 text-gray-400">
           <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
-          <p className="text-sm">Loading dashboardâ€¦</p>
+          <p className="text-sm">Loading dashboard...</p>
         </div>
       </div>
     );
@@ -123,16 +123,16 @@ const Dashboard = () => {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center max-w-sm">
-          <div className="text-4xl mb-3">âš ï¸</div>
+          <div className="text-4xl mb-3">!</div>
           <p className="font-semibold text-gray-800 mb-1">Failed to load data</p>
           <p className="text-sm text-gray-500">{error}</p>
-          <p className="text-xs text-gray-400 mt-2">Make sure the backend is running on port 8080.</p>
+          <p className="text-xs text-gray-400 mt-2">Make sure the backend is running on port 8081.</p>
         </div>
       </div>
     );
   }
 
-  /* â”€â”€ render â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  /* render */
   return (
     <div className="space-y-6">
 
@@ -142,28 +142,28 @@ const Dashboard = () => {
           title="Total Transactions"
           value={transactions.length.toLocaleString()}
           subtitle="All time"
-          icon="ðŸ’³"
+          icon="TX"
           colorClass="bg-blue-50"
         />
         <SummaryCard
           title="Active Alerts"
           value={activeAlerts.length.toLocaleString()}
           subtitle={highAlerts.length ? `${highAlerts.length} high severity` : 'No high severity'}
-          icon="ðŸš¨"
+          icon="AL"
           colorClass="bg-red-50"
         />
         <SummaryCard
           title="Rules Active"
           value={activeRules.length.toLocaleString()}
           subtitle={pausedRules.length ? `${pausedRules.length} paused` : 'All rules active'}
-          icon="ðŸ“‹"
+          icon="RL"
           colorClass="bg-purple-50"
         />
         <SummaryCard
           title="Currencies Tracked"
           value={currencies.length.toLocaleString()}
           subtitle={`${activeCurrencies.length} active`}
-          icon="ðŸ’±"
+          icon="FX"
           colorClass="bg-emerald-50"
         />
       </div>
@@ -179,7 +179,7 @@ const Dashboard = () => {
           <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
             <h3 className="text-base font-semibold text-gray-800">Recent Transactions</h3>
             <a href="/transactions" className="text-xs text-blue-600 hover:underline font-medium">
-              View all â†’
+              View all
             </a>
           </div>
 
@@ -204,10 +204,10 @@ const Dashboard = () => {
                       <td className="px-6 py-3 font-mono text-gray-700">#{tx.transactionId}</td>
                       <td className="px-6 py-3 text-gray-600">{tx.accountId}</td>
                       <td className="px-6 py-3 font-semibold text-gray-800">{formatUsd(tx.amountUsd ?? tx.amount)}</td>
-                      <td className="px-6 py-3 text-gray-600 capitalize">{tx.type ?? 'â€”'}</td>
+                      <td className="px-6 py-3 text-gray-600 capitalize">{tx.type ?? '--'}</td>
                       <td className="px-6 py-3">
                         <span className={`text-xs font-semibold px-2 py-1 rounded-full ${statusBadge(tx.status)}`}>
-                          {tx.status ?? 'â€”'}
+                          {tx.status ?? '--'}
                         </span>
                       </td>
                       <td className="px-6 py-3 text-gray-400 whitespace-nowrap">{timeAgo(tx.timestamp)}</td>
@@ -224,7 +224,7 @@ const Dashboard = () => {
           <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
             <h3 className="text-base font-semibold text-gray-800">Recent Alerts</h3>
             <a href="/alerts" className="text-xs text-blue-600 hover:underline font-medium">
-              View all â†’
+              View all
             </a>
           </div>
 
@@ -239,14 +239,14 @@ const Dashboard = () => {
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
                         <p className="text-sm font-medium text-gray-800 truncate">
-                          {rule?.ruleName ?? `Rule #${alert.ruleId ?? 'â€”'}`}
+                          {rule?.ruleName ?? `Rule #${alert.ruleId ?? '--'}`}
                         </p>
                         <p className="text-xs text-gray-400 mt-0.5">
-                          Txn #{alert.transactionId ?? 'â€”'} Â· {timeAgo(alert.createDate)}
+                          Txn #{alert.transactionId ?? '--'} - {timeAgo(alert.createDate)}
                         </p>
                       </div>
                       <span className={`text-xs font-semibold px-2 py-1 rounded-full whitespace-nowrap ${severityBadge(alert.severity)}`}>
-                        {alert.severity ?? 'â€”'}
+                        {alert.severity ?? '--'}
                       </span>
                     </div>
                   </li>
