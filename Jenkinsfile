@@ -1,15 +1,19 @@
 pipeline {
   agent any
 
+  tools {
+    nodejs 'node-22'
+  }
+
   options {
     timestamps()
     disableConcurrentBuilds()
   }
 
   environment {
-        GIT_URL = 'https://github.com/Neueda-Learning/11_105_CYPHERSQUAD.git'
-        BRANCH = 'main'
-    }
+    GIT_URL = 'https://github.com/Neueda-Learning/11_105_CYPHERSQUAD.git'
+    BRANCH = 'main'
+  }
 
   stages {
     stage('Checkout') {
@@ -35,6 +39,8 @@ pipeline {
     stage('Frontend Build') {
       steps {
         dir('frontend/transaction-monitoring-ui') {
+          sh 'node -v'
+          sh 'npm -v'
           sh '''
             if [ -f package-lock.json ]; then
               npm ci
