@@ -8,12 +8,9 @@ pipeline {
   }
 
   environment {
-    BACKEND_IMAGE = 'cyphersquad-backend'
-    FRONTEND_IMAGE = 'cyphersquad-frontend'
-    IMAGE_TAG = "${env.BUILD_NUMBER}"
-    // Set this in Jenkins if you want Docker push, for example: yourdockerhubuser
-    DOCKER_REGISTRY_NAMESPACE = "${env.DOCKER_REGISTRY_NAMESPACE}"
-  }
+        GIT_URL = 'https://github.com/SumeetWajpe/frauddetectionapp.git'
+        BRANCH = 'main'
+    }
 
   stages {
     stage('Checkout') {
@@ -53,25 +50,16 @@ pipeline {
 
     stage('Docker Build') {
       steps {
-        sh 'docker build -t ${BACKEND_IMAGE}:${IMAGE_TAG} backend'
-        sh 'docker build -t ${FRONTEND_IMAGE}:${IMAGE_TAG} frontend/transaction-monitoring-ui'
+        sh 'docker compose build'
       }
     }
 
-    stage('Docker Push (main only)') {
+    stage('Deploy From Main Branch') {
       when {
         branch 'main'
-        expression { return env.DOCKER_REGISTRY_NAMESPACE?.trim() }
       }
       steps {
-        withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-          sh 'echo "${DOCKER_PASS}" | docker login -u "${DOCKER_USER}" --password-stdin'
-          sh 'docker tag ${BACKEND_IMAGE}:${IMAGE_TAG} ${DOCKER_REGISTRY_NAMESPACE}/${BACKEND_IMAGE}:${IMAGE_TAG}'
-          sh 'docker tag ${FRONTEND_IMAGE}:${IMAGE_TAG} ${DOCKER_REGISTRY_NAMESPACE}/${FRONTEND_IMAGE}:${IMAGE_TAG}'
-          sh 'docker push ${DOCKER_REGISTRY_NAMESPACE}/${BACKEND_IMAGE}:${IMAGE_TAG}'
-          sh 'docker push ${DOCKER_REGISTRY_NAMESPACE}/${FRONTEND_IMAGE}:${IMAGE_TAG}'
-          sh 'docker logout'
-        }
+        sh 'docker compose up -d --build --remove-orphans'
       }
     }
   }
