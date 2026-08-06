@@ -38,10 +38,10 @@ public class AlertController {
 		return ResponseEntity.ok(alertService.getAlertById(alertId));
 	}
 
-	@GetMapping("/alertId/{alertId}")
-	public ResponseEntity<Alert> getAlertByAlertId(@PathVariable("alertId") Long alertId) {
-		return ResponseEntity.ok(alertService.getAlertByAlertId(alertId));
-	}
+	// @GetMapping("/alertId/{alertId}")
+	// public ResponseEntity<Alert> getAlertByAlertId(@PathVariable("alertId") Long alertId) {
+	// 	return ResponseEntity.ok(alertService.getAlertByAlertId(alertId));
+	// }
 
 	@PutMapping("/{id}")
 	public ResponseEntity<Alert> updateAlert(@PathVariable("id") Long alertId, @Valid @RequestBody AlertUpdateRequest request) {
