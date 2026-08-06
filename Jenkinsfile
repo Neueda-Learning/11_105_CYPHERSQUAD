@@ -48,7 +48,7 @@ pipeline {
 
     stage('Docker Build') {
       steps {
-        sh 'docker compose build'
+        sh 'docker-compose build'
       }
     }
 
@@ -57,7 +57,7 @@ pipeline {
         branch 'main'
       }
       steps {
-        sh 'docker compose up -d --build --remove-orphans'
+        sh 'docker-compose up -d --build --remove-orphans'
       }
     }
   }
