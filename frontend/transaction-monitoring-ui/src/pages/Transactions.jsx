@@ -11,6 +11,21 @@ const INITIAL_FORM = {
   status: "SUCCESS",
 };
 
+const INITIAL_FILTERS = {
+  transactionId: "",
+  accountId: "",
+  payeeId: "",
+  amountMin: "",
+  amountMax: "",
+  amountUsdMin: "",
+  amountUsdMax: "",
+  currency: "",
+  type: "",
+  status: "",
+  timestampFrom: "",
+  timestampTo: "",
+};
+
 function formatUsd(value) {
   if (value == null) return "--";
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
@@ -25,6 +40,7 @@ const Transactions = () => {
   const [error, setError] = useState("");
   const [formError, setFormError] = useState("");
   const [formData, setFormData] = useState(INITIAL_FORM);
+  const [filters, setFilters] = useState(INITIAL_FILTERS);
 
   const activeCurrencies = useMemo(
     () => currencies.filter((currency) => currency.active).sort((a, b) => a.currencyCode.localeCompare(b.currencyCode)),
@@ -35,6 +51,65 @@ const Transactions = () => {
     () => [...transactions].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)),
     [transactions]
   );
+
+  const filteredTransactions = useMemo(() => {
+    const toNumber = (value) => {
+      if (value === "") return null;
+      const parsed = Number(value);
+      return Number.isNaN(parsed) ? null : parsed;
+    };
+
+    const transactionId = toNumber(filters.transactionId);
+    const accountId = toNumber(filters.accountId);
+    const payeeId = toNumber(filters.payeeId);
+    const amountMin = toNumber(filters.amountMin);
+    const amountMax = toNumber(filters.amountMax);
+    const amountUsdMin = toNumber(filters.amountUsdMin);
+    const amountUsdMax = toNumber(filters.amountUsdMax);
+    const currency = filters.currency.trim().toUpperCase();
+    const type = filters.type.trim().toUpperCase();
+    const status = filters.status.trim().toUpperCase();
+    const timestampFromMs = filters.timestampFrom ? new Date(filters.timestampFrom).getTime() : null;
+    const timestampToMs = filters.timestampTo ? new Date(filters.timestampTo).getTime() : null;
+
+    return sortedTransactions.filter((transaction) => {
+      const txAmount = Number(transaction.amount);
+      const txAmountUsd = transaction.amountUsd == null ? null : Number(transaction.amountUsd);
+      const txTimeMs = transaction.timestamp ? new Date(transaction.timestamp).getTime() : null;
+
+      if (transactionId != null && Number(transaction.transactionId) !== transactionId) return false;
+      if (accountId != null && Number(transaction.accountId) !== accountId) return false;
+      if (payeeId != null && Number(transaction.payeeId) !== payeeId) return false;
+
+      if (amountMin != null && (Number.isNaN(txAmount) || txAmount < amountMin)) return false;
+      if (amountMax != null && (Number.isNaN(txAmount) || txAmount > amountMax)) return false;
+
+      if (amountUsdMin != null && (txAmountUsd == null || Number.isNaN(txAmountUsd) || txAmountUsd < amountUsdMin)) return false;
+      if (amountUsdMax != null && (txAmountUsd == null || Number.isNaN(txAmountUsd) || txAmountUsd > amountUsdMax)) return false;
+
+      if (currency && String(transaction.currency || "").toUpperCase() !== currency) return false;
+      if (type && String(transaction.type || "").toUpperCase() !== type) return false;
+      if (status && String(transaction.status || "").toUpperCase() !== status) return false;
+
+      if (timestampFromMs != null) {
+        if (txTimeMs == null || Number.isNaN(txTimeMs) || txTimeMs < timestampFromMs) return false;
+      }
+      if (timestampToMs != null) {
+        if (txTimeMs == null || Number.isNaN(txTimeMs) || txTimeMs > timestampToMs) return false;
+      }
+
+      return true;
+    });
+  }, [sortedTransactions, filters]);
+
+  const filterOptions = useMemo(() => {
+    const uniqueSorted = (values) => [...new Set(values)].filter(Boolean).sort((a, b) => a.localeCompare(b));
+    return {
+      currencies: uniqueSorted(transactions.map((tx) => String(tx.currency || "").toUpperCase())),
+      types: uniqueSorted(transactions.map((tx) => String(tx.type || "").toUpperCase())),
+      statuses: uniqueSorted(transactions.map((tx) => String(tx.status || "").toUpperCase())),
+    };
+  }, [transactions]);
 
   useEffect(() => {
     loadTransactions();
@@ -79,6 +154,15 @@ const Transactions = () => {
   function onChange(event) {
     const { name, value } = event.target;
     setFormData((current) => ({ ...current, [name]: value }));
+  }
+
+  function onFilterChange(event) {
+    const { name, value } = event.target;
+    setFilters((current) => ({ ...current, [name]: value }));
+  }
+
+  function clearFilters() {
+    setFilters(INITIAL_FILTERS);
   }
 
   async function onSubmit(event) {
@@ -225,6 +309,136 @@ const Transactions = () => {
           </button>
         </div>
 
+        <div className="mb-4 rounded-lg border border-gray-200 bg-gray-50 p-3">
+          <div className="mb-2 flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-gray-800">Filters</h3>
+            <button className="rounded-lg border border-gray-300 bg-white px-3 py-1 text-xs" onClick={clearFilters} type="button">
+              Clear Filters
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <input
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+              name="transactionId"
+              type="number"
+              min="1"
+              placeholder="ID"
+              value={filters.transactionId}
+              onChange={onFilterChange}
+            />
+            <input
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+              name="accountId"
+              type="number"
+              min="1"
+              placeholder="Account ID"
+              value={filters.accountId}
+              onChange={onFilterChange}
+            />
+            <input
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+              name="payeeId"
+              type="number"
+              min="1"
+              placeholder="Payee ID"
+              value={filters.payeeId}
+              onChange={onFilterChange}
+            />
+            <select
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+              name="currency"
+              value={filters.currency}
+              onChange={onFilterChange}
+            >
+              <option value="">All currencies</option>
+              {filterOptions.currencies.map((code) => (
+                <option key={code} value={code}>
+                  {code}
+                </option>
+              ))}
+            </select>
+
+            <input
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+              name="amountMin"
+              type="number"
+              step="0.0001"
+              placeholder="Amount min"
+              value={filters.amountMin}
+              onChange={onFilterChange}
+            />
+            <input
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+              name="amountMax"
+              type="number"
+              step="0.0001"
+              placeholder="Amount max"
+              value={filters.amountMax}
+              onChange={onFilterChange}
+            />
+            <input
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+              name="amountUsdMin"
+              type="number"
+              step="0.0001"
+              placeholder="Amount USD min"
+              value={filters.amountUsdMin}
+              onChange={onFilterChange}
+            />
+            <input
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+              name="amountUsdMax"
+              type="number"
+              step="0.0001"
+              placeholder="Amount USD max"
+              value={filters.amountUsdMax}
+              onChange={onFilterChange}
+            />
+
+            <select
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+              name="type"
+              value={filters.type}
+              onChange={onFilterChange}
+            >
+              <option value="">All types</option>
+              {filterOptions.types.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
+            <select
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+              name="status"
+              value={filters.status}
+              onChange={onFilterChange}
+            >
+              <option value="">All statuses</option>
+              {filterOptions.statuses.map((status) => (
+                <option key={status} value={status}>
+                  {status}
+                </option>
+              ))}
+            </select>
+            <input
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+              name="timestampFrom"
+              type="datetime-local"
+              value={filters.timestampFrom}
+              onChange={onFilterChange}
+            />
+            <input
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+              name="timestampTo"
+              type="datetime-local"
+              value={filters.timestampTo}
+              onChange={onFilterChange}
+            />
+          </div>
+        </div>
+
         {loading ? <p className="text-sm text-gray-500">Loading transactions...</p> : null}
         {error ? <p className="text-sm text-red-600">{error}</p> : null}
 
@@ -244,7 +458,7 @@ const Transactions = () => {
                 </tr>
               </thead>
               <tbody>
-                {sortedTransactions.map((transaction) => (
+                {filteredTransactions.map((transaction) => (
                   <tr key={transaction.transactionId} className="border-b border-gray-100">
                     <td className="py-3 pr-4">
                       <Link className="font-medium text-blue-700 hover:underline" to={`/transactions/${transaction.transactionId}`}>
@@ -262,7 +476,7 @@ const Transactions = () => {
                 ))}
               </tbody>
             </table>
-            {sortedTransactions.length === 0 ? <p className="pt-4 text-sm text-gray-500">No transactions found.</p> : null}
+            {filteredTransactions.length === 0 ? <p className="pt-4 text-sm text-gray-500">No transactions match filters.</p> : null}
           </div>
         ) : null}
       </section>
