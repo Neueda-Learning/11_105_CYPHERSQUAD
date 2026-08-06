@@ -1,7 +1,10 @@
 package com.CypherSquad.backend.controllers;
 
+import com.CypherSquad.backend.dto.AlertStatusUpdateRequest;
+import com.CypherSquad.backend.dto.AlertUpdateRequest;
 import com.CypherSquad.backend.models.Alert;
 import com.CypherSquad.backend.services.AlertService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -14,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/alerts")
@@ -42,14 +44,14 @@ public class AlertController {
 	}
 
 	@PutMapping("/{id}")
-	public ResponseEntity<Alert> updateAlert(@PathVariable("id") Long alertId, @RequestBody Alert alert) {
-		return ResponseEntity.ok(alertService.updateAlert(alertId, alert));
+	public ResponseEntity<Alert> updateAlert(@PathVariable("id") Long alertId, @Valid @RequestBody AlertUpdateRequest request) {
+		return ResponseEntity.ok(alertService.updateAlert(alertId, toAlert(request)));
 	}
 
 	@PutMapping("/{id}/status")
 	public ResponseEntity<Alert> updateAlertStatus(@PathVariable("id") Long alertId,
-		@RequestBody Map<String, String> payload) {
-		return ResponseEntity.ok(alertService.updateAlertStatus(alertId, payload.get("status")));
+		@Valid @RequestBody AlertStatusUpdateRequest request) {
+		return ResponseEntity.ok(alertService.updateAlertStatus(alertId, request.getStatus()));
 	}
 
 	@GetMapping("/status/{status}")
@@ -63,4 +65,20 @@ public class AlertController {
 		return ResponseEntity.noContent().build();
 	}
 
+	@GetMapping("/alertId/{alertId}")
+	public ResponseEntity<Alert> getAlertByAlertId(@PathVariable Long alertId) {
+		return ResponseEntity.status(HttpStatus.OK).body(alertService.getAlertByAlertId(alertId));
+	}
+
+	private Alert toAlert(AlertUpdateRequest request) {
+		Alert alert = new Alert();
+		alert.setTransactionId(request.getTransactionId());
+		alert.setRuleId(request.getRuleId());
+		alert.setSeverity(request.getSeverity());
+		alert.setStatus(request.getStatus());
+		alert.setCreateDate(request.getCreateDate());
+		alert.setCloseDate(request.getCloseDate());
+		alert.setNote(request.getNote());
+		return alert;
+	}
 }
