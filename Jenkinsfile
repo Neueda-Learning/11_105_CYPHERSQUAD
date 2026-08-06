@@ -8,7 +8,7 @@ pipeline {
   }
 
   environment {
-        GIT_URL = 'https://github.com/SumeetWajpe/frauddetectionapp.git'
+        GIT_URL = 'https://github.com/Neueda-Learning/11_105_CYPHERSQUAD.git'
         BRANCH = 'main'
     }
 
