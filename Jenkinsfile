@@ -1,10 +1,6 @@
 pipeline {
   agent any
 
-  tools {
-    nodejs 'node-22'
-  }
-
   options {
     timestamps()
     disableConcurrentBuilds()
@@ -39,16 +35,13 @@ pipeline {
     stage('Frontend Build') {
       steps {
         dir('frontend/transaction-monitoring-ui') {
-          sh 'node -v'
-          sh 'npm -v'
           sh '''
-            if [ -f package-lock.json ]; then
-              npm ci
-            else
-              npm install
-            fi
+            docker run --rm \
+              -v "$PWD:/app" \
+              -w /app \
+              node:22-alpine \
+              sh -c 'node -v && npm -v && if [ -f package-lock.json ]; then npm ci; else npm install; fi && npm run build'
           '''
-          sh 'npm run build'
         }
       }
     }
