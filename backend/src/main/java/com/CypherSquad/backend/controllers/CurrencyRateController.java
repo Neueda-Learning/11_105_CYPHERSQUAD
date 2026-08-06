@@ -6,6 +6,7 @@ import com.CypherSquad.backend.services.CurrencyRateService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -20,6 +21,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/currency")
+@CrossOrigin(origins = "*")
 public class CurrencyRateController {
 	private final CurrencyRateService currencyRateService;
 

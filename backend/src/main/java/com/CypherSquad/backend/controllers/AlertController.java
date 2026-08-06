@@ -7,6 +7,7 @@ import com.CypherSquad.backend.services.AlertService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,6 +20,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/alerts")
+@CrossOrigin(origins = "*")
 public class AlertController {
 	private final AlertService alertService;
 
@@ -36,6 +38,11 @@ public class AlertController {
 		return ResponseEntity.ok(alertService.getAlertById(alertId));
 	}
 
+	@GetMapping("/alertId/{alertId}")
+	public ResponseEntity<Alert> getAlertByAlertId(@PathVariable("alertId") Long alertId) {
+		return ResponseEntity.ok(alertService.getAlertByAlertId(alertId));
+	}
+
 	@PutMapping("/{id}")
 	public ResponseEntity<Alert> updateAlert(@PathVariable("id") Long alertId, @Valid @RequestBody AlertUpdateRequest request) {
 		return ResponseEntity.ok(alertService.updateAlert(alertId, toAlert(request)));
@@ -47,7 +54,7 @@ public class AlertController {
 		return ResponseEntity.ok(alertService.updateAlertStatus(alertId, request.getStatus()));
 	}
 
-	@GetMapping("/{status:[A-Za-z][A-Za-z0-9_-]*}")
+	@GetMapping("/status/{status}")
 	public ResponseEntity<List<Alert>> getAlertsByStatus(@PathVariable String status) {
 		return ResponseEntity.ok(alertService.getAlertsByStatus(status));
 	}
