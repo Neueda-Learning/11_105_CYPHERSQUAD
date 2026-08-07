@@ -21,14 +21,80 @@ The system automatically evaluates transactions, generates alerts for suspicious
 
 # 🏗️ System Architecture
 
-             React Dashboard
-                   |
-                   |
-            REST API Layer
-           (Spring Boot)
-                   |
-    --------------------------------
-    |              |               |
+            ```mermaid
+flowchart TD
+
+    U[User]
+
+    R[React Dashboard<br/>(Transactions & Alerts UI)<br/><br/>
+    - View Transactions<br/>
+    - View Alerts<br/>
+    - Alert Details & Investigation<br/>
+    - Rules Management<br/>
+    - Reports & History]
+
+    API[REST API Layer<br/>(Spring Boot)<br/><br/>
+    - Controllers<br/>
+    - DTOs<br/>
+    - Validation<br/>
+    - Exception Handling]
+
+    TS[Transaction Service<br/><br/>
+    - Create Transaction<br/>
+    - View Transactions<br/>
+    - Search & Filter<br/>
+    - Transaction History]
+
+    RE[Rule Engine Service<br/><br/>
+    - Amount Threshold Rule<br/>
+    - Velocity Rule<br/>
+    - New Payee Rule<br/>
+    - Daily Limit Rule]
+
+    AS[Alert Service<br/><br/>
+    - Generate Alerts<br/>
+    - Alert Lifecycle Management<br/>
+    - Acknowledge / Investigate<br/>
+    - Close / Dismiss<br/>
+    - Alert History]
+
+    RL[Repository Layer<br/>(Spring Data JPA)<br/><br/>
+    - Transaction Repository<br/>
+    - Rule Repository<br/>
+    - Alert Repository]
+
+    DB[(Database<br/>(MySQL / PostgreSQL)<br/><br/>
+    Transaction Table<br/>
+    Rule Table<br/>
+    Alert Table)]
+
+    AL[Alert Lifecycle<br/><br/>
+    OPEN<br/>↓<br/>
+    ACKNOWLEDGED<br/>↓<br/>
+    INVESTIGATING<br/>↓<br/>
+    CLOSED<br/><br/>
+    OPEN → DISMISSED]
+
+
+    U --> R
+    R -->|HTTPS / JSON| API
+
+    API --> TS
+    API --> RE
+    API --> AS
+
+    TS --> RE
+    RE --> AS
+
+    TS --> RL
+    RE --> RL
+    AS --> RL
+
+    RL --> DB
+
+    AS --> AL
+
+```
 
 Transaction Rule Engine Alert Management
 Service Service Service
@@ -54,7 +120,7 @@ Database
 - Mockito (Testing)
 
 ### Database
-- MySQL/PostgreSQL
+- MySQL
 
 ### DevOps
 - Git & GitHub
