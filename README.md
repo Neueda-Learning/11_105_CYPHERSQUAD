@@ -20,79 +20,108 @@ The system automatically evaluates transactions, generates alerts for suspicious
 ---
 
 # 🏗️ System Architecture
+## 📂 System Architecture Tree
 
-            ```mermaid
-flowchart TD
-
-    U[User]
-
-    R[React Dashboard<br/>(Transactions & Alerts UI)<br/><br/>
-    - View Transactions<br/>
-    - View Alerts<br/>
-    - Alert Details & Investigation<br/>
-    - Rules Management<br/>
-    - Reports & History]
-
-    API[REST API Layer<br/>(Spring Boot)<br/><br/>
-    - Controllers<br/>
-    - DTOs<br/>
-    - Validation<br/>
-    - Exception Handling]
-
-    TS[Transaction Service<br/><br/>
-    - Create Transaction<br/>
-    - View Transactions<br/>
-    - Search & Filter<br/>
-    - Transaction History]
-
-    RE[Rule Engine Service<br/><br/>
-    - Amount Threshold Rule<br/>
-    - Velocity Rule<br/>
-    - New Payee Rule<br/>
-    - Daily Limit Rule]
-
-    AS[Alert Service<br/><br/>
-    - Generate Alerts<br/>
-    - Alert Lifecycle Management<br/>
-    - Acknowledge / Investigate<br/>
-    - Close / Dismiss<br/>
-    - Alert History]
-
-    RL[Repository Layer<br/>(Spring Data JPA)<br/><br/>
-    - Transaction Repository<br/>
-    - Rule Repository<br/>
-    - Alert Repository]
-
-    DB[(Database<br/>(MySQL / PostgreSQL)<br/><br/>
-    Transaction Table<br/>
-    Rule Table<br/>
-    Alert Table)]
-
-    AL[Alert Lifecycle<br/><br/>
-    OPEN<br/>↓<br/>
-    ACKNOWLEDGED<br/>↓<br/>
-    INVESTIGATING<br/>↓<br/>
-    CLOSED<br/><br/>
-    OPEN → DISMISSED]
-
-
-    U --> R
-    R -->|HTTPS / JSON| API
-
-    API --> TS
-    API --> RE
-    API --> AS
-
-    TS --> RE
-    RE --> AS
-
-    TS --> RL
-    RE --> RL
-    AS --> RL
-
-    RL --> DB
-
-    AS --> AL
+```text
+Transaction Monitoring & Alert Management System
+│
+├── 👤 User
+│
+├── 🖥️ React Dashboard
+│   │
+│   ├── Transactions UI
+│   │   ├── View Transactions
+│   │   ├── Search & Filter
+│   │   └── Transaction History
+│   │
+│   ├── Alerts UI
+│   │   ├── View Active Alerts
+│   │   ├── Alert Details
+│   │   ├── Acknowledge Alert
+│   │   ├── Investigate Alert
+│   │   └── Close / Dismiss Alert
+│   │
+│   ├── Rules Management UI
+│   │   ├── View Rules
+│   │   ├── Add Rule
+│   │   └── Update Rule
+│   │
+│   └── Reports & History
+│
+├── 🔌 REST API Layer (Spring Boot)
+│   │
+│   ├── Controllers
+│   │   ├── Transaction Controller
+│   │   ├── Alert Controller
+│   │   └── Rule Controller
+│   │
+│   ├── DTO Layer
+│   │
+│   ├── Validation Layer
+│   │
+│   └── Exception Handling
+│
+├── ⚙️ Service Layer
+│   │
+│   ├── Transaction Service
+│   │   ├── Create Transaction
+│   │   ├── Fetch Transactions
+│   │   └── Transaction Processing
+│   │
+│   ├── Rule Engine Service
+│   │   │
+│   │   ├── Amount Threshold Rule
+│   │   ├── Velocity Rule
+│   │   ├── New Payee Rule
+│   │   └── Daily Limit Rule
+│   │
+│   └── Alert Service
+│       │
+│       ├── Generate Alert
+│       ├── Alert Lifecycle Management
+│       ├── Alert Status Update
+│       └── Alert History
+│
+├── 🗄️ Repository Layer (Spring Data JPA)
+│   │
+│   ├── Transaction Repository
+│   ├── Rule Repository
+│   └── Alert Repository
+│
+├── 💾 Database (MySQL/PostgreSQL)
+│   │
+│   ├── Transaction Table
+│   │   ├── id
+│   │   ├── account_id
+│   │   ├── amount
+│   │   ├── payee_id
+│   │   └── timestamp
+│   │
+│   ├── Rule Table
+│   │   ├── id
+│   │   ├── rule_name
+│   │   ├── rule_type
+│   │   └── threshold
+│   │
+│   └── Alert Table
+│       ├── id
+│       ├── transaction_id
+│       ├── rule_id
+│       ├── status
+│       └── severity
+│
+└── 🚨 Alert Lifecycle
+    │
+    ├── OPEN
+    │
+    ├── ACKNOWLEDGED
+    │
+    ├── INVESTIGATING
+    │
+    ├── CLOSED
+    │
+    └── DISMISSED
+```
 
 ```
 
